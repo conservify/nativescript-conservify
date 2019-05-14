@@ -35,7 +35,7 @@ The NativeScript plugin seed is built to be used as a starting point by NativeSc
 
 ### What is NativeScript plugin seed?
 
-The NativeScript plugin seed is built to be used as a starting point by NativeScript plugin developers. It expands on several things [presented here](http://developer.telerik.com/featured/creating-nativescript-plugins-in-typescript/).
+The NativeScript plugin seed is built to be used as a starting point by NativeScript plugin developers.
 What does the seed give you out of the box?
 * the plugin structure with option for easy development and debugging (see [Development setup section](#Developmentsetup) below)
 * a simple working plugin
