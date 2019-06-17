@@ -84,7 +84,7 @@ For easier development and debugging purposes continue with the following steps:
 
 Now go and make a change to your plugin. It will be automatically applied to the demo project.
 
-**NOTE**: Any changes that you need to make in a native library used in your plugin or in any other files inside `src/platforms` directory such as Info.plist or AndroidManifest.xml can't be directly reflected in the demo applications. You need to use `npm run demo.reset` or `npm run demo-angular.ios` and run the application again.
+**NOTE**: Any changes that you need to make in a native library used in your plugin or in any other files inside `src/platforms` directory such as Info.plist or AndroidManifest.xml can't be directly reflected in the demo applications. You need to use `npm run demo.reset` or `npm run demo-angular.reset` and run the application again.
 
 ### Linking to CocoaPod or Android Arsenal plugins
 
@@ -130,7 +130,7 @@ Sometimes you may need to wipe away the `src/node_modules`, `demo/node_modules` 
 
 Sometimes you just need to wipe out the demo's `platforms` directory only:
 
-* Run `npm run demo.reset` or `npm run demo-angular.ios` to delete the application's `platforms` directory only.
+* Run `npm run demo.reset` or `npm run demo-angular.reset` to delete the application's `platforms` directory only.
 
 Sometimes you may need to ensure plugin files are updated in the demo:
 
