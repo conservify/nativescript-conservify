@@ -13,7 +13,8 @@ var class_name,
         include_javascript_demo: undefined,
         include_typescript_demo: undefined,
         include_angular_demo: undefined,
-        include_vue_demo: undefined
+        include_vue_demo: undefined,
+        templates_branch: undefined
     },
     seed_plugin_name = "yourplugin",
     seed_class_name = "YourPlugin",
@@ -26,6 +27,7 @@ var class_name,
     demoAngularFolder = "../" + angularAppName,
     // demoVueFolder = "../" + vueAppName,
     screenshots_dir = "../screenshots",
+    templates_dir = "../nativescript-app-templates",
     seed_tests_dir = "../seed-tests",
     scripts_dir = "scripts",
     filesToReplace = {
@@ -112,6 +114,7 @@ if (argv) {
     inputParams.include_typescript_demo = argv.includeTypeScriptDemo;
     inputParams.include_angular_demo = argv.includeAngularDemo;
     // inputParams.include_vue_demo = argv.includeVueDemo;
+    inputParams.templates_branch = argv.templatesBranch;
 }
 
 if (!isInteractive() && (!inputParams.github_username || !inputParams.plugin_name || !inputParams.init_git || !inputParams.include_typescript_demo || !inputParams.include_angular_demo)) {
@@ -196,7 +199,7 @@ function askTypeScriptDemo() {
 function askAngularDemo() {
     if (inputParams.include_angular_demo !== undefined) {
         // askVueDemo();
-        createDemoAppsFromTemplates();
+        prepareDemoAppsFromTemplates();
     } else {
         prompt.start();
         prompt.get({
@@ -210,14 +213,14 @@ function askAngularDemo() {
 
             inputParams.include_angular_demo = result.include_angular_demo;
             // askVueDemo();
-            createDemoAppsFromTemplates();
+            prepareDemoAppsFromTemplates();
         });
     }
 }
 
 // function askVueDemo() {
 //     if (inputParams.include_vue_demo !== undefined) {
-//         createDemoAppsFromTemplates();
+//         prepareDemoAppsFromTemplates();
 //     } else {
 //         prompt.start();
 //         prompt.get({
@@ -230,15 +233,22 @@ function askAngularDemo() {
 //             }
 
 //             inputParams.include_vue_demo = result.include_vue_demo;
-//             createDemoAppsFromTemplates();
+//             prepareDemoAppsFromTemplates();
 //         });
 //     }
 // }
 
-function createDemoAppsFromTemplates() {
+function prepareDemoAppsFromTemplates() {
+    let templatesOrigin = inputParams.templates_branch ?
+        "nativescript-app-templates/packages/template-blank" :
+        "tns-template-blank";
+    let templatesOriginName = inputParams.templates_branch ?
+        "branch " + inputParams.templates_branch :
+        "latest published template";
     if (inputParams.include_typescript_demo && inputParams.include_typescript_demo.toLowerCase() === "y") {
         appsToCreate.push({
-            command: "cd ../ && tns create " + tsAppName + " --template tns-template-blank-ts && cd " + tsAppName + " && cd ../src/",
+            command: "cd ../ && tns create " + tsAppName + " --template " + templatesOrigin + "-ts && cd " + tsAppName + " && cd ../src/",
+            startMessage: "Creating 'TypeScript' application from " + templatesOriginName + "...",
             successMessage: "TypeScript-NativeScript application created at: " + demoTsFolder,
             type: "TypeScript"
         });
@@ -247,7 +257,8 @@ function createDemoAppsFromTemplates() {
 
     if (inputParams.include_angular_demo && inputParams.include_angular_demo.toLowerCase() === "y") {
         appsToCreate.push({
-            command: "cd ../ && tns create " + angularAppName + " --template tns-template-blank-ng && cd " + angularAppName + " && cd ../src/",
+            command: "cd ../ && tns create " + angularAppName + " --template " + templatesOrigin + "-ng && cd " + angularAppName + " && cd ../src/",
+            startMessage: "Creating 'Angular' application from " + templatesOriginName + "...",
             successMessage: "Angular-NativeScript application created at: " + demoAngularFolder,
             type: "Angular"
         });
@@ -257,15 +268,39 @@ function createDemoAppsFromTemplates() {
     // if (inputParams.include_vue_demo && inputParams.include_vue_demo.toLowerCase() === "y") {
     //     appsToCreate.push({
     //         command: "cd ../ && tns create " + vueAppName + " --vue && cd " + vueAppName + " && cd ../src/",
+    //         startMessage: "Creating 'Vue' application from " + templatesOriginName + "...",
     //         successMessage: "Vue-NativeScript application created at: /demo-vue",
     //         type: "Vue"
     //     });
     //     appsToInstallPluginIn.push(demoVueFolder);
     // }
 
+    if (appsToCreate.length > 0 && inputParams.templates_branch) {
+        console.log("Cloning repository NativeScript/nativescript-app-templates...");
+        exec('cd ../ && git clone https://github.com/NativeScript/nativescript-app-templates.git', function (err, stdout, stderr) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log("Repository cloned.");
+                exec('cd ../nativescript-app-templates && git checkout ' + inputParams.templates_branch, function (err, stdout, stderr) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log("Checked out branch " + inputParams.templates_branch);
+                    }
+                });
+
+                createDemoAppsFromTemplates();
+            }
+        });
+    } else {
+        createDemoAppsFromTemplates();
+    }
+}
+
+function createDemoAppsFromTemplates() {
     let appObject = appsToCreate.pop();
     if (appObject) {
-        console.log("Creating '" + appObject.type + "' application from latest template ...");
         startProcess(appObject);
     } else {
         adjustScripts();
@@ -273,6 +308,9 @@ function createDemoAppsFromTemplates() {
 }
 
 function startProcess(commandAndMessage) {
+    if (commandAndMessage.startMessage) {
+        console.log(commandAndMessage.startMessage);
+    }
     let mainChildProcess = spawn(commandAndMessage.command, [], { stdio: 'inherit', shell: true, detached: false });
     mainChildProcess.on("close", function (code, signal) {
         if (commandAndMessage.successMessage) {
@@ -283,7 +321,6 @@ function startProcess(commandAndMessage) {
             adjustScripts();
         } else {
             let appObject = appsToCreate.pop();
-            console.log("Creating '" + appObject.type + "' application from latest template ...");
             startProcess(appObject);
         }
     });
@@ -606,13 +643,16 @@ function addPluginToDemoApps() {
                         console.log('Screenshots removed.');
                         rimraf(seed_tests_dir, function () {
                             console.log('Seed tests removed.');
+                            rimraf(templates_dir, function () {
+                                console.log('Templates removed.');
 
-                            // delete postclone.js
-                            rimraf.sync('../CONTRIBUTING.md');
-                            rimraf.sync('../CODE_OF_CONDUCT.md');
-                            rimraf.sync(scripts_dir + '/postclone.js');
+                                // delete postclone.js
+                                rimraf.sync('../CONTRIBUTING.md');
+                                rimraf.sync('../CODE_OF_CONDUCT.md');
+                                rimraf.sync(scripts_dir + '/postclone.js');
 
-                            askInitGit();
+                                askInitGit();
+                            });
                         });
                     });
                 } else {
