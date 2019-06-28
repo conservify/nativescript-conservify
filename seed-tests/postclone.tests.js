@@ -50,7 +50,7 @@ describe('postclone', function () {
         });
     });
 
-    it('should crate only TypeScript app (demo)', function (done) {
+    it('should create only TypeScript app (demo)', function (done) {
         testUtils.copySeedDir(constants.SEED_LOCATION, constants.SEED_COPY_LOCATION, function (err) {
             if (err) {
                 done.fail(err);
@@ -77,7 +77,35 @@ describe('postclone', function () {
         });
     });
 
-    it('should crate only Angular app (demo-angular)', function (done) {
+    it('should create only TypeScript app (demo) for Release branch', function (done) {
+        testUtils.copySeedDir(constants.SEED_LOCATION, constants.SEED_COPY_LOCATION, function (err) {
+            if (err) {
+                done.fail(err);x
+            }
+
+            _srcReadmeContent = fs.readFileSync(constants.SEED_LOCATION + "/src/README.md");
+            testUtils.callPostcloneForBranch(constants.SEED_COPY_LOCATION, constants.TEST_GITHUB_USERNAME, constants.TEST_PLUGIN_NAME, "n",  "y", "n", function (error, stdout) {
+                if (error) {
+                    done.fail(error);
+                } else {
+                    var seedCopyPath = path.resolve(__dirname, constants.SEED_COPY_LOCATION);
+                    let tsConfigContents = fs.readFileSync(seedCopyPath + "/demo/tsconfig.json").toString('utf-8');
+
+                    expect(fs.existsSync(seedCopyPath + "/demo")).toBe(true);
+                    expect(stdout.includes("Updating ../demo/")).toBe(true);
+                    expect(stdout.includes("Creating 'TypeScript' application from branch release...")).toBe(true);
+                    expect(tsConfigContents.includes("app/*")).toBe(true);
+
+                    expect(fs.existsSync(seedCopyPath + "/demo-angular")).toBe(false);
+                    expect(stdout.includes("Updating ../demo-angular/")).toBe(false);
+
+                    done();
+                }
+            });
+        });
+    });
+
+    it('should create only Angular app (demo-angular)', function (done) {
         testUtils.copySeedDir(constants.SEED_LOCATION, constants.SEED_COPY_LOCATION, function (err) {
             if (err) {
                 done.fail(err);
@@ -104,7 +132,7 @@ describe('postclone', function () {
         });
     });
 
-    it('should crate both TypeScript & Angular app (demo & demo-angular)', function (done) {
+    it('should create both TypeScript & Angular app (demo & demo-angular)', function (done) {
         testUtils.copySeedDir(constants.SEED_LOCATION, constants.SEED_COPY_LOCATION, function (err) {
             if (err) {
                 done.fail(err);
