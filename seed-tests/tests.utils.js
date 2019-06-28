@@ -77,6 +77,15 @@ exports.callPostclone = function callPostclone(seedLocation, githubUsername, plu
     });
 };
 
+exports.callPostcloneForBranch = function callPostcloneForBranch(seedLocation, githubUsername, pluginName, initGit, includeTypeScriptDemo, includeAngularDemo, callback) {
+    var postcloneScript = getPackageJsonPostcloneScript();
+    postcloneScript = postcloneScript.replace("postclone.js", "postclone.js templatesBranch=release gitHubUsername=" + githubUsername + " pluginName=" + pluginName + " initGit=" + initGit + " includeTypeScriptDemo=" + includeTypeScriptDemo + " includeAngularDemo=" + includeAngularDemo);
+    console.log("Executing postclone script with args: " + postcloneScript);
+    exec("cd " + seedLocation + "/src && " + postcloneScript, function (error, stdout, stderr) {
+        callback(error, stdout, stderr);
+    });
+};
+
 exports.callDevelopmentSetup = function callDevelopmentSetup(seedLocation, callback) {
     exec("cd " + seedLocation + "/src && npm run development.setup", function (error, stdout, stderr) {
         callback(error, stdout, stderr);
