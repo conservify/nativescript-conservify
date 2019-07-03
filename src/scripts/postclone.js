@@ -641,8 +641,6 @@ function addPluginToDemoApps() {
                 if (appsToInstallPluginIn.length == 0) {
                     rimraf(screenshots_dir, function () {
                         console.log('Screenshots removed.');
-                        // rimraf(seed_tests_dir, function () {
-                        //     console.log('Seed tests removed.');
                             rimraf(templates_dir, function () {
                                 console.log('Templates removed.');
 
@@ -653,7 +651,6 @@ function addPluginToDemoApps() {
 
                                 askInitGit();
                             });
-                        // });
                     });
                 } else {
                     addPluginToDemoApps();
