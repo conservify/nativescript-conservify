@@ -35,7 +35,7 @@ matrix:
         - cd ../demo
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo.apk"
         - cd $ANDROID_PACKAGE_FOLDER_JS && zip -r $ANDROID_PACKAGE_JS demo.apk
-        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_JS?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_JS/app-debug.apk"
+        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_JS?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_JS/$ANDROID_PACKAGE_JS"
     - os: osx
       env: 
         - BuildiOS="12.0"
