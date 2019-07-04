@@ -109,15 +109,10 @@ var argv = parseArgv();
 
 if (argv) {
     inputParams.github_username = argv.gitHubUsername;
-    console.log("github_username: " + argv.gitHubUsername);
     inputParams.plugin_name = argv.pluginName;
-    console.log("plugin_name: " + argv.pluginName);
     inputParams.init_git = argv.initGit;
-    console.log("init_git: " + argv.initGit);
     inputParams.include_typescript_demo = argv.includeTypeScriptDemo;
-    console.log("include_typescript_demo: " + argv.includeTypeScriptDemo);
     inputParams.include_angular_demo = argv.includeAngularDemo;
-    console.log("include_angular_demo: " + argv.includeAngularDemo);
     // inputParams.include_vue_demo = argv.includeVueDemo;
     inputParams.templates_branch = argv.templatesBranch;
 }
