@@ -30,7 +30,7 @@ matrix:
       jdk: oraclejdk8
       before_install: nvm install 10
       script:
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=y includeAngularDemo=n
         - npm run tsc
         - cd ../demo
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo.apk"
@@ -45,7 +45,7 @@ matrix:
       node_js: "10"
       jdk: oraclejdk8
       script: 
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=y includeAngularDemo=n
         - npm run tsc
         - cd ../demo
         - travis_wait travis_retry tns build ios --copy-to "./outputs/demo.app"
@@ -59,7 +59,7 @@ matrix:
       jdk: oraclejdk8
       before_install: nvm install 10
       script:
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=n includeAngularDemo=y
         - npm run tsc
         - cd ../demo-angular
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo-angular.apk"
@@ -74,7 +74,7 @@ matrix:
       node_js: "10"
       jdk: oraclejdk8
       script: 
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=n includeAngularDemo=y
         - npm run tsc
         - cd ../demo-angular
         - travis_wait travis_retry tns build ios --copy-to "./outputs/demo-angular.app"
