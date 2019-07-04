@@ -34,7 +34,7 @@ matrix:
         - npm run tsc
         - cd ../demo
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo.apk"
-        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_JS?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_JS/$ANDROID_PACKAGE_JS"
+        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_JS?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_JS/demo.apk"
     - os: osx
       env: 
         - BuildiOS="12.0"
@@ -62,7 +62,7 @@ matrix:
         - npm run tsc
         - cd ../demo-angular
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo-angular.apk"
-        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_NG?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_NG/$ANDROID_PACKAGE_NG"
+        - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_NG?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_NG/demo-angular.apk"
     - os: osx
       env: 
         - BuildiOS="12.0"
