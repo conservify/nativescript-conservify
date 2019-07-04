@@ -30,7 +30,9 @@ matrix:
       jdk: oraclejdk8
       before_install: nvm install 10
       script:
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n && npm run tsc && cd ../demo
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n
+        - npm run tsc
+        - cd ../demo
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo.apk"
         - cd $ANDROID_PACKAGE_FOLDER_JS && zip -r $ANDROID_PACKAGE_JS demo.apk
         - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_JS?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_JS/app-debug.apk"
@@ -43,7 +45,9 @@ matrix:
       node_js: "10"
       jdk: oraclejdk8
       script: 
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n && npm run tsc && cd ../demo
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=y includeAngularDemo=n
+        - npm run tsc
+        - cd ../demo
         - travis_wait travis_retry tns build ios --copy-to "./outputs/demo.app"
         - cd $IOS_PACKAGE_FOLDER_JS && zip -r $IOS_PACKAGE_JS demo.app
         - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $IOS_SAUCE_STORAGE/$IOS_PACKAGE_JS?overwrite=true --data-binary @$IOS_PACKAGE_FOLDER_JS/$IOS_PACKAGE_JS"
@@ -55,7 +59,9 @@ matrix:
       jdk: oraclejdk8
       before_install: nvm install 10
       script:
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y && npm run tsc && cd ../demo-angular
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y
+        - npm run tsc
+        - cd ../demo-angular
         - travis_wait travis_retry tns build android --copy-to "./outputs/demo-angular.apk"
         - cd $ANDROID_PACKAGE_FOLDER_NG && zip -r $ANDROID_PACKAGE_NG demo-angular.apk
         - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $ANDROID_SAUCE_STORAGE/$ANDROID_PACKAGE_NG?overwrite=true --data-binary @$ANDROID_PACKAGE_FOLDER_NG/$ANDROID_PACKAGE_NG"
@@ -68,7 +74,9 @@ matrix:
       node_js: "10"
       jdk: oraclejdk8
       script: 
-        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y && npm run tsc && cd ../demo-angular
+        - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypescriptDemo=n includeAngularDemo=y
+        - npm run tsc
+        - cd ../demo-angular
         - travis_wait travis_retry tns build ios --copy-to "./outputs/demo-angular.app"
         - cd $IOS_PACKAGE_FOLDER_NG && zip -r $IOS_PACKAGE_NG demo-angular.app
         - "curl -u $SAUCE_USER:$SAUCE_KEY -X POST -H 'Content-Type: application/octet-stream' $IOS_SAUCE_STORAGE/$IOS_PACKAGE_NG?overwrite=true --data-binary @$IOS_PACKAGE_FOLDER_NG/$IOS_PACKAGE_NG"
