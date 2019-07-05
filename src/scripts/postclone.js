@@ -641,17 +641,19 @@ function addPluginToDemoApps() {
                 if (appsToInstallPluginIn.length == 0) {
                     rimraf(screenshots_dir, function () {
                         console.log('Screenshots removed.');
+                        rimraf(seed_tests_dir, function () {
+                            console.log('Seed tests removed.');
                             rimraf(templates_dir, function () {
                                 console.log('Templates removed.');
-                                rimraf(seed_tests_dir, function () {
-                                    console.log('Seed tests removed.');
-                                    // delete postclone.js
-                                    rimraf.sync('../CONTRIBUTING.md');
-                                    rimraf.sync('../CODE_OF_CONDUCT.md');
-                                    rimraf.sync(scripts_dir + '/postclone.js');
-                                    askInitGit();
-                                });
+
+                                // delete postclone.js
+                                rimraf.sync('../CONTRIBUTING.md');
+                                rimraf.sync('../CODE_OF_CONDUCT.md');
+                                rimraf.sync(scripts_dir + '/postclone.js');
+
+                                askInitGit();
                             });
+                        });
                     });
                 } else {
                     addPluginToDemoApps();
