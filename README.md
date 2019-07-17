@@ -29,7 +29,7 @@ The NativeScript plugin seed is built to be used as a starting point by NativeSc
 1. `git clone https://github.com/NativeScript/nativescript-plugin-seed nativescript-yourplugin` where `nativescript-yourplugin` is the name of your plugin.
 2. `cd nativescript-yourplugin/src`
 3. `npm run postclone`
-4. `npm run demo.ios` or `npm run demo.android` to run the demo. This will automatically watch for TypeScript changes also in your plugin and do the transpilation.
+4. `npm run demo.ios` or `npm run demo.android` to run the demo.
 
 ## Long Description
 
@@ -77,10 +77,9 @@ Now you can continue with the development of your plugin by using the [Developme
 **NOTE**: The plugin seed is updated to use the latest version of NativeScript. If you are not ready to upgrade, you can checkout a [tagged version](https://github.com/NativeScript/nativescript-plugin-seed/tags) that is compatible with your NativeScript version.
 
 #### Development setup
-For easier development and debugging purposes continue with the following steps:
+For easier development and debugging purposes continue with the following:
 
-1. Open a command prompt/terminal, navigate to `src` folder and run `npm run demo.ios`, `npm run demo.android`, `npm run demo-angular.ios`, `npm run demo-angular.android` to run the demo applications created during `postclone`.
-2. Open another command prompt/terminal, navigate to `src` folder and run `npm run plugin.tscwatch` to watch for file changes in your plugin.
+Open a command prompt/terminal, navigate to `src` folder and run `npm run demo.ios`, `npm run demo.android`, `npm run demo-angular.ios`, `npm run demo-angular.android` to run the demo applications created during `postclone`.
 
 Now go and make a change to your plugin. It will be automatically applied to the demo project.
 
