@@ -58,6 +58,7 @@ matrix:
       language: node_js 
       node_js: "10"
       jdk: oraclejdk8
+      before_script: pod repo update
       script: 
         - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=y includeAngularDemo=n
         - npm run tsc
@@ -87,6 +88,7 @@ matrix:
       language: node_js 
       node_js: "10"
       jdk: oraclejdk8
+      before_script: pod repo update
       script: 
         - cd src && npm run postclone gitHubUsername=TheGitHubUser pluginName=ThePlugin initGit=y includeTypeScriptDemo=n includeAngularDemo=y
         - npm run tsc
