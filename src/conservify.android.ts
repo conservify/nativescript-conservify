@@ -88,15 +88,19 @@ export class Conservify extends Common {
             onProgress(task, bytes, total) {
                 console.log("download:onProgress", task, bytes, total);
 
-                const task = active[task];
+                const { info } = active[task];
+                const { progress } = info;
+
+                if (progress) {
+                    progress(total, bytes);
+                }
             },
 
             onComplete(task, headers, contentType, body, statusCode) {
-                console.log("download:onComplete", task, headers, body, statusCode);
+                console.log("download:onComplete", task, headers, contentType, body, statusCode);
 
                 function getBody() {
                     if (body) {
-                        console.log(contentType);
                         if (contentType == "application/json") {
                             return JSON.parse(body);
                         }

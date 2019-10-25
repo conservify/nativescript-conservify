@@ -39,14 +39,14 @@ function createViewModel() {
         return conservify.download({
             url: "http://192.168.0.100:6060/fk-bundled-fkb.bin",
             path: where.path,
-            progress: () => {
+            progress: (total, copied) => {
+                console.log("progress", total, copied);
             },
         });
     }).then(() => {
         const f = knownFolders.documents().getFolder("fk").getFile("test.bin");
         console.log("downloaded", f.path, f.size);
     }).then(() => {
-        console.log("HI");
         return conservify.protobuf({
             url: "http://192.168.0.100:2380/fk/v1",
             body: null
