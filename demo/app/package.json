@@ -2,6 +2,9 @@
   "main": "app.js",
   "android": {
     "v8Flags": "--expose_gc",
-    "markingMode": "none"
+    "markingMode": "none",
+    "requireModules": [
+      "nativescript-conservify"
+    ]
   }
 }

@@ -13,11 +13,13 @@
   "repository": "<fill-your-repository-here>",
   "dependencies": {
     "nativescript-theme-core": "~1.0.6",
-    "tns-core-modules": "~6.1.0"
+    "tns-core-modules": "~6.1.0",
+    "nativescript-conservify": "../src"
   },
   "devDependencies": {
     "nativescript": "^6.1.2",
-    "nativescript-dev-webpack": "~1.2.0"
+    "nativescript-dev-webpack": "~1.2.0",
+    "typescript": "^3.6.4"
   },
   "gitHead": "1964ea9e8ca1a0518e0d6370781eedcf6c23db42",
   "readme": "NativeScript Application"

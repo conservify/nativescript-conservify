@@ -1,5 +1,9 @@
 const Observable = require("tns-core-modules/data/observable").Observable;
 
+const conservify = require("nativescript-conservify");
+
+console.log(conservify);
+
 function getMessage(counter) {
     if (counter <= 0) {
         return "Hoorraaay! You unlocked the NativeScript clicker achievement!";

@@ -5,6 +5,7 @@ const nsWebpack = require("nativescript-dev-webpack");
 const nativescriptTarget = require("nativescript-dev-webpack/nativescript-target");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { NativeScriptWorkerPlugin } = require("nativescript-worker-loader/NativeScriptWorkerPlugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -56,6 +57,9 @@ module.exports = env => {
     const entryModule = nsWebpack.getEntryModule(appFullPath, platform);
     const entryPath = `.${sep}${entryModule}.js`;
     const entries = { bundle: entryPath };
+
+    const tsConfigPath = resolve(projectRoot, "tsconfig.tns.json");
+
     const areCoreModulesExternal = Array.isArray(env.externals) && env.externals.some(e => e.indexOf("tns-core-modules") > -1);
     if (platform === "ios" && !areCoreModulesExternal) {
         entries["tns_modules/tns-core-modules/inspector_modules"] = "inspector_modules";
@@ -94,7 +98,7 @@ module.exports = env => {
             hashSalt
         },
         resolve: {
-            extensions: [".js", ".scss", ".css"],
+            extensions: [".ts", ".js", ".scss", ".css"],
             // Resolve {N} system modules from tns-core-modules
             modules: [
                 resolve(__dirname, "node_modules/tns-core-modules"),
@@ -202,6 +206,24 @@ module.exports = env => {
                         "sass-loader"
                     ]
                 },
+
+                {
+                    test: /\.ts$/,
+                    use: {
+                        loader: "ts-loader",
+                        options: {
+                            configFile: tsConfigPath,
+                            // https://github.com/TypeStrong/ts-loader/blob/ea2fcf925ec158d0a536d1e766adfec6567f5fb4/README.md#faster-builds
+                            // https://github.com/TypeStrong/ts-loader/blob/ea2fcf925ec158d0a536d1e766adfec6567f5fb4/README.md#hot-module-replacement
+                            transpileOnly: true,
+                            allowTsInNodeModules: true,
+                            compilerOptions: {
+                                sourceMap: isAnySourceMapEnabled,
+                                declaration: false
+                            }
+                        },
+                    }
+                },
             ]
         },
         plugins: [
@@ -228,7 +250,15 @@ module.exports = env => {
                 platforms,
             }),
             // Does IPC communication with the {N} CLI to notify events when running in watch mode.
-            new nsWebpack.WatchStateLoggerPlugin()
+            new nsWebpack.WatchStateLoggerPlugin(),
+            // https://github.com/TypeStrong/ts-loader/blob/ea2fcf925ec158d0a536d1e766adfec6567f5fb4/README.md#faster-builds
+            // https://github.com/TypeStrong/ts-loader/blob/ea2fcf925ec158d0a536d1e766adfec6567f5fb4/README.md#hot-module-replacement
+            new ForkTsCheckerWebpackPlugin({
+                tsconfig: tsConfigPath,
+                async: false,
+                useTypescriptIncrementalApi: true,
+                memoryLimit: 4096
+            })
         ],
     };
 
