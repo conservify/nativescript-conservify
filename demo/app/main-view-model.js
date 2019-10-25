@@ -1,8 +1,7 @@
 const Observable = require("tns-core-modules/data/observable").Observable;
+const Conservify = require("nativescript-conservify").Conservify;
 
-const conservify = require("nativescript-conservify");
-
-console.log(conservify);
+const { Folder, path, File, knownFolders } = require("tns-core-modules/file-system");
 
 function getMessage(counter) {
     if (counter <= 0) {
@@ -21,6 +20,44 @@ function createViewModel() {
         viewModel.counter--;
         viewModel.set("message", getMessage(viewModel.counter));
     };
+
+    const conservify = new Conservify();
+
+    const where = knownFolders.documents().getFolder("fk").getFile("test.bin");
+
+    console.log("where", where.path);
+
+    console.log('conservify', conservify);
+
+    conservify.start("_fk._tcp").then(() => {
+        return conservify.json({
+            url: "https://ifconfig.me/all.json"
+        });
+    }) .then((data) => {
+        console.log("json", data);
+    }).then(() => {
+        return conservify.download({
+            url: "http://192.168.0.100:6060/fk-bundled-fkb.bin",
+            path: where.path,
+            progress: () => {
+            },
+        });
+    }).then(() => {
+        const f = knownFolders.documents().getFolder("fk").getFile("test.bin");
+        console.log("downloaded", f.path, f.size);
+    }).then(() => {
+        console.log("HI");
+        return conservify.protobuf({
+            url: "http://192.168.0.100:2380/fk/v1",
+            body: null
+        }).then((data) => {
+            console.log("protobuf", data.body.length);
+        });
+    }).then(() => {
+        return conservify.scanNetworks();
+    }).catch(err => {
+        console.log('Error', err);
+    });
 
     return viewModel;
 }

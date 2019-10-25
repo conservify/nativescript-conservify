@@ -35,7 +35,7 @@ var Conservify = (function (_super) {
             },
             onError: function (task) {
                 console.log("upload:onError", task);
-            },
+            }
         });
         var downloadListener = new org.conservify.networking.WebTransferListener({
             onStarted: function (task, headers) {
@@ -49,7 +49,7 @@ var Conservify = (function (_super) {
             },
             onError: function (task) {
                 console.log("download:onError", task);
-            },
+            }
         });
         this.networking = new org.conservify.networking.Networking(application_1.android.context, this.networkingListener, this.uploadListener, this.downloadListener);
         console.log("ready");
@@ -57,4 +57,4 @@ var Conservify = (function (_super) {
     return Conservify;
 }(conservify_common_1.Common));
 exports.Conservify = Conservify;
-//# sourceMappingURL=conservify.android.js.map
+//# sourceMappingURL=flycheck_conservify.android.js.map
