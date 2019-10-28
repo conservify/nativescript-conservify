@@ -5,9 +5,18 @@ import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
 export class Conservify extends Common {
+    active: { [key: string]: any; };
+    scan: any;
+    networkingListener: org.conservify.networking.NetworkingListener;
+    downloadListener: org.conservify.networking.WebTransferListener;
+    uploadListener: org.conservify.networking.WebTransferListener;
+    networking: org.conservify.networking.Networking;
+    dataListener: org.conservify.data.DataListener;
+    fileSystem: org.conservify.data.FileSystem;
+
     constructor() {
         super();
-        this.active = {};
+        this.active = {}; 
         this.scan = null;
     }
 
@@ -36,9 +45,9 @@ export class Conservify extends Common {
             onNetworksFound(networks) {
                 console.log("onNetworksFound", networks, networks.getNetworks());
 
-                const found = [];
+                const found: string[] = [];
                 for (let i = 0; i < networks.getNetworks().size(); ++i) {
-                    const n = network.getNetworks()[i];
+                    const n = networks.getNetworks()[i];
                     found.append({
                         ssid: n.getSsid()
                     });
@@ -79,20 +88,20 @@ export class Conservify extends Common {
         });
 
         this.downloadListener = new org.conservify.networking.WebTransferListener({
-            onStarted(task, headers) {
-                console.log("download:onStarted", task, headers);
+            onStarted(taskId, headers) {
+                console.log("download:onStarted", taskId, headers);
 
-                const task = active[task];
+                const task = active[taskId];
             },
 
-            onProgress(task, bytes, total) {
-                console.log("download:onProgress", task, bytes, total);
+            onProgress(taskId, bytes, total) {
+                console.log("download:onProgress", taskId, bytes, total);
 
-                const task = active[task];
+                const task = active[taskId];
             },
 
-            onComplete(task, headers, contentType, body, statusCode) {
-                console.log("download:onComplete", task, headers, body, statusCode);
+            onComplete(taskId, headers, contentType, body, statusCode) {
+                console.log("download:onComplete", taskId, headers, body, statusCode);
 
                 function getBody() {
                     if (body) {
@@ -107,9 +116,9 @@ export class Conservify extends Common {
                     return null;
                 }
 
-                const task = active[task];
+                const task = active[taskId];
 
-                delete active[task];
+                delete active[taskId];
 
                 task.resolve({
                     headers: headers,
@@ -118,12 +127,12 @@ export class Conservify extends Common {
                 });
             },
 
-            onError(task) {
-                console.log("download:onError", task);
+            onError(taskId) {
+                console.log("download:onError", taskId);
 
-                const task = active[task];
+                const task = active[taskId];
 
-                delete active[task];
+                delete active[taskId];
 
                 task.reject({});
             },
@@ -132,16 +141,16 @@ export class Conservify extends Common {
         this.dataListener = new org.conservify.data.DataListener({
             onFileInfo(path, info) {
                 console.log("fs:onFileInfo", path, info);
-            }
+            },
 
             onFileRecords(path, records) {
                 console.log("fs:onFileRecords", path, records);
-            }
+            },
 
             onFileAnalysis(path, analysis) {
                 console.log("fs:onFileAnalysis", path, analysis);
-            }
-        })
+            },
+        });
 
         this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.dataListener);
 
