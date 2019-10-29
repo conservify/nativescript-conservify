@@ -2,16 +2,21 @@ declare namespace org {
     declare namespace conservify {
         declare namespace data {
             export class DataListener {
+                constructor(members: any);
             }
 
             export class FileSystem {
+                constructor(androidContext: any, dataListener: DataListener);
             }
         }
+
         declare namespace networking {
             export class NetworkingListener {
+                constructor(members: any);
             }
 
             export class WebTransferListener {
+                constructor(members: any);
             }
 
             export class WebTransfer {
@@ -30,7 +35,7 @@ declare namespace org {
             }
 
             export class ServiceDiscovery {
-                start(): void
+                start(serviceType: string): void
             }
 
             export class WifiNetworksManager {
@@ -39,11 +44,13 @@ declare namespace org {
             }
 
             export class Networking {
+                constructor(androidContext: any, networkingListener: NetworkingListener, uploadListener: WebTransferListener, downloadListener: WebTransferListener);
+
                 getWeb(): Web
                 getWifi(): WifiNetworksManager
                 getServiceDiscovery(): ServiceDiscovery
 
-                start(): void
+                start(serviceType: string): void
             }
         }
     }

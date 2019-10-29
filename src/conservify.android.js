@@ -30,8 +30,8 @@ var Conservify = (function (_super) {
                 console.log("onNetworksFound", networks, networks.getNetworks());
                 var found = [];
                 for (var i = 0; i < networks.getNetworks().size(); ++i) {
-                    var n = network.getNetworks()[i];
-                    found.append({
+                    var n = networks.getNetworks()[i];
+                    found.push({
                         ssid: n.getSsid()
                     });
                 }
@@ -49,17 +49,17 @@ var Conservify = (function (_super) {
             },
         });
         this.uploadListener = new org.conservify.networking.WebTransferListener({
-            onStarted: function (task, headers) {
-                console.log("upload:onStarted", task, headers);
+            onStarted: function (taskId, headers) {
+                console.log("upload:onStarted", taskId, headers);
             },
-            onProgress: function (task, bytes, total) {
-                console.log("upload:onProgress", task, bytes, total);
+            onProgress: function (taskId, bytes, total) {
+                console.log("upload:onProgress", taskId, bytes, total);
             },
-            onComplete: function (task, headers, body, statusCode) {
-                console.log("upload:onComplete", task, headers, body, statusCode);
+            onComplete: function (taskId, headers, contentType, body, statusCode) {
+                console.log("upload:onComplete", taskId, headers, contentType, body, statusCode);
             },
-            onError: function (task) {
-                console.log("upload:onError", task);
+            onError: function (taskId) {
+                console.log("upload:onError", taskId);
             },
         });
         this.downloadListener = new org.conservify.networking.WebTransferListener({
@@ -72,7 +72,7 @@ var Conservify = (function (_super) {
                 var task = active[taskId];
             },
             onComplete: function (taskId, headers, contentType, body, statusCode) {
-                console.log("download:onComplete", taskId, headers, body, statusCode);
+                console.log("download:onComplete", taskId, headers, contentType, body, statusCode);
                 function getBody() {
                     if (body) {
                         console.log(contentType);
@@ -140,7 +140,7 @@ var Conservify = (function (_super) {
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setUrl(info.url);
         if (info.body) {
-            var requestBody = new Buffer.from(info.body).toString("hex");
+            var requestBody = Buffer.from(info.body).toString("hex");
             transfer.setBody(requestBody);
         }
         transfer.header("Content-Type", "text/plain");

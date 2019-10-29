@@ -31,22 +31,23 @@ declare class Networking extends NSObject {
 
 	  static new(): Networking; // inherited from NSObject
 
-	  constructor(o: { networkingListener: NetworkingListener; uploadListener: WebTransferListener; downloadListener: WebTransferListener; });
+    initWithNetworkingListenerUploadListenerDownloadListener(networkingListener: NetworkingListener, uploadListener: WebTransferListener, downloadListener: WebTransferListener): Networking;
 
     getServiceDiscovery(): ServiceDiscovery
     getWeb(): Web
-    start(): void
+
+    startWithServiceType(serviceType: string): void
     test(): void
 }
 
 class MyNetworkingListener extends NSObject implements NetworkingListener {
     public static ObjCProtocols = [NetworkingListener];
 
-    static new(): MyNetworkingListener {
+	  static alloc(): MyNetworkingListener {
         return <MyNetworkingListener>super.new();
     }
 
-    public init(): MyNetworkingListener {
+    public initMine(): MyNetworkingListener {
         return <MyNetworkingListener>this;
     }
 
@@ -60,10 +61,10 @@ export class Conservify extends Common {
         super();
     }
 
-    public start(serviceType) {
+    public start(serviceType: string) {
         console.log("initialize, ok");
 
-        const networkingListener = MyNetworkingListener.alloc().init();
+        const networkingListener = <MyNetworkingListener>MyNetworkingListener.alloc().initMine();
 
         console.log("networkingListener", networkingListener);
 
@@ -86,6 +87,7 @@ export class Conservify extends Common {
         catch (e) {
             console.log("error", e);
         }
+
 
         networking.startWithServiceType(serviceType);
 
