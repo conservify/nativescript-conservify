@@ -15,10 +15,10 @@ declare var NetworkingListener: {
 }
 
 interface WebTransferListener {
-    onStarted(taskId: string, headers: any): void;
-    onProgress(taskId: string, bytes: number, total: number): void;
-    onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number): void;
-    onError(taskId: string): void;
+    onStartedWithTaskIdHeaders(taskId: string, headers: any): void;
+    onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number): void;
+    onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number): void;
+    onErrorWithTaskId(taskId: string): void;
 }
 
 declare var WebTransferListener: {
@@ -140,19 +140,19 @@ class UploadListener extends NSObject implements WebTransferListener {
         return <UploadListener>this;
     }
 
-    public onStarted(taskId: string, headers: any) {
+    public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
         console.log("upload:onStarted", taskId, headers);
     }
 
-    public onProgress(taskId: string, bytes: number, total: number) {
+    public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
         console.log("upload:onProgress", taskId, bytes, total);
     }
 
-    public onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
         console.log("upload:onStarted", taskId, headers, contentType, body, statusCode);
     }
 
-    public onError(taskId: string) {
+    public onErrorWithTaskId(taskId: string) {
         console.log("upload:onError", taskId);
     }
 }
@@ -168,19 +168,19 @@ class DownloadListener extends NSObject implements WebTransferListener {
         return <DownloadListener>this;
     }
 
-    public onStarted(taskId: string, headers: any) {
+    public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
         console.log("download:onStarted", taskId, headers);
     }
 
-    public onProgress(taskId: string, bytes: number, total: number) {
+    public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
         console.log("download:onProgress", taskId, bytes, total);
     }
 
-    public onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
         console.log("download:onStarted", taskId, headers, contentType, body, statusCode);
     }
 
-    public onError(taskId: string) {
+    public onErrorWithTaskId(taskId: string) {
         console.log("upload:onError", taskId);
     }
 }
