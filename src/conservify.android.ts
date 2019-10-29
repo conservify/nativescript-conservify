@@ -16,7 +16,7 @@ export class Conservify extends Common {
 
     constructor() {
         super();
-        this.active = {}; 
+        this.active = {};
         this.scan = null;
     }
 
