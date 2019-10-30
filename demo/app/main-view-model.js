@@ -56,7 +56,13 @@ function createViewModel() {
             console.log("protobuf", data.body.length);
         });
     }).then(() => {
+        console.log("scanning");
         return conservify.scanNetworks();
+    }).then(networks => {
+        console.log("networks", networks)
+    }).then(() => {
+        console.log("DONE");
+        return { };
     }).catch(err => {
         console.log('Error', err);
     });

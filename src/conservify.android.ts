@@ -4,6 +4,13 @@ import * as applicationModule from 'tns-core-modules/application';
 import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
+const debug = (() => {
+    if (false) {
+        return console.log;
+    }
+    return () => { };
+})();
+
 export class Conservify extends Common {
     active: { [key: string]: any; };
     scan: any;
@@ -21,81 +28,88 @@ export class Conservify extends Common {
     }
 
     public start(serviceType: string) {
-        console.log("initialize");
+        debug("initialize");
 
+        const owner = this;
         const active = this.active;
 
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onFoundService(service: any) {
-                console.log("onFoundService", service);
+                debug("onFoundService", service);
             },
 
             onLostService(service: any) {
-                console.log("onLostService", service);
+                debug("onLostService", service);
             },
 
             onConnectionInfo(connected: any) {
-                console.log("onConnectionInfo", connected);
+                debug("onConnectionInfo", connected);
             },
 
             onConnectedNetwork(network: any) {
-                console.log("onConnectedNetwork", network.getSsid());
+                debug("onConnectedNetwork", network.getSsid());
             },
 
             onNetworksFound(networks: any) {
-                console.log("onNetworksFound", networks, networks.getNetworks());
+                if (owner.scan) {
+                    debug("onNetworksFound", networks, networks.getNetworks());
 
-                const found: { ssid: string }[] = [];
-                for (let i = 0; i < networks.getNetworks().size(); ++i) {
-                    const n = networks.getNetworks()[i];
-                    found.push({
-                        ssid: n.getSsid()
-                    });
+                    const found: { ssid: string }[] = [];
+                    for (let i = 0; i < networks.getNetworks().size(); ++i) {
+                        const n = networks.getNetworks()[i];
+                        found.push({
+                            ssid: n.getSsid()
+                        });
+                    }
+
+                    owner.scan.resolve(found);
+                    owner.scan = null;
                 }
-
-                if (this.scan) {
-                    this.scan.resolve(found);
-                    this.scan = null;
+                else {
+                    console.error("onNetworksFound no promise");
                 }
             },
 
             onNetworkScanError() {
-                console.log("onNetworkScanError");
+                if (owner.scan) {
+                    debug("onNetworkScanError");
 
-                if (this.scan) {
-                    this.scan.reject();
-                    this.scan = null;
+                    owner.scan.reject();
+                    owner.scan = null;
+                }
+                else {
+                    console.error("onNetworkScanError no promise");
                 }
             },
         });
 
         this.uploadListener = new org.conservify.networking.WebTransferListener({
             onStarted(taskId: string, headers: any) {
-                console.log("upload:onStarted", taskId, headers);
+                debug("upload:onStarted", taskId, headers);
             },
 
             onProgress(taskId: string, bytes: number, total: number) {
-                console.log("upload:onProgress", taskId, bytes, total);
+                debug("upload:onProgress", taskId, bytes, total);
             },
 
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-                console.log("upload:onComplete", taskId, headers, contentType, body, statusCode);
+                debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
             },
 
             onError(taskId: string) {
-                console.log("upload:onError", taskId);
+                debug("upload:onError", taskId);
             },
         });
 
         this.downloadListener = new org.conservify.networking.WebTransferListener({
             onStarted(taskId: string, headers: any) {
-                console.log("download:onStarted", taskId, headers);
+                debug("download:onStarted", taskId, headers);
 
                 const task = active[taskId];
             },
 
             onProgress(taskId: string, bytes: number, total: number) {
-                console.log("download:onProgress", taskId, bytes, total);
+                debug("download:onProgress", taskId, bytes, total);
 
                 const { info } = active[taskId];
                 const { progress } = info;
@@ -106,11 +120,11 @@ export class Conservify extends Common {
             },
 
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-                console.log("download:onComplete", taskId, headers, contentType, body, statusCode);
+                debug("download:onComplete", taskId, headers, contentType, body, statusCode);
 
                 function getBody() {
                     if (body) {
-                        if (contentType == "application/json") {
+                        if (contentType.indexOf("application/json") >= 0) {
                             return JSON.parse(body);
                         }
                         else {
@@ -132,7 +146,7 @@ export class Conservify extends Common {
             },
 
             onError(taskId: string) {
-                console.log("download:onError", taskId);
+                debug("download:onError", taskId);
 
                 const task = active[taskId];
 
@@ -144,15 +158,15 @@ export class Conservify extends Common {
 
         this.dataListener = new org.conservify.data.DataListener({
             onFileInfo(path: string, info: any) {
-                console.log("fs:onFileInfo", path, info);
+                debug("fs:onFileInfo", path, info);
             },
 
             onFileRecords(path: string, records: any) {
-                console.log("fs:onFileRecords", path, records);
+                debug("fs:onFileRecords", path, records);
             },
 
             onFileAnalysis(path: string, analysis: any) {
-                console.log("fs:onFileAnalysis", path, analysis);
+                debug("fs:onFileAnalysis", path, analysis);
             },
         });
 
@@ -162,7 +176,7 @@ export class Conservify extends Common {
 
         this.networking.getServiceDiscovery().start(serviceType);
 
-        console.log("ready");
+        debug("ready");
 
         return Promise.resolve({ });
     }
@@ -225,15 +239,15 @@ export class Conservify extends Common {
     }
 
     public scanNetworks() {
-        this.networking.getWifi().findConnectedNetwork();
-
-        this.networking.getWifi().scan();
-
         return new Promise((resolve, reject) => {
             this.scan = {
                 resolve,
                 reject
             };
+
+            // this.networking.getWifi().findConnectedNetwork();
+
+            this.networking.getWifi().scan();
         });
     }
 }
