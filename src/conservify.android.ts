@@ -14,6 +14,8 @@ const debug = (() => {
 export class Conservify extends Common {
     active: { [key: string]: any; };
     scan: any;
+    connected: any;
+
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;
     uploadListener: org.conservify.networking.WebTransferListener;
@@ -25,6 +27,7 @@ export class Conservify extends Common {
         super();
         this.active = {};
         this.scan = null;
+        this.connected = null;
     }
 
     public start(serviceType: string) {
@@ -48,6 +51,11 @@ export class Conservify extends Common {
 
             onConnectedNetwork(network: any) {
                 debug("onConnectedNetwork", network.getSsid());
+
+                if (owner.connected) {
+                    owner.connected.resolve(network);
+                    owner.connected = null;
+                }
             },
 
             onNetworksFound(networks: any) {
@@ -245,14 +253,23 @@ export class Conservify extends Common {
         });
     }
 
+    public findConnectedNetwork() {
+        return new Promise((resolve, reject) => {
+            this.connected = {
+                resolve,
+                reject
+            };
+
+            this.networking.getWifi().findConnectedNetwork();
+        });
+    }
+
     public scanNetworks() {
         return new Promise((resolve, reject) => {
             this.scan = {
                 resolve,
                 reject
             };
-
-            // this.networking.getWifi().findConnectedNetwork();
 
             this.networking.getWifi().scan();
         });

@@ -63,6 +63,16 @@ function createViewModel() {
             }
         });
     }).then(() => {
+        console.log("findConnectedNetwork");
+        return conservify.findConnectedNetwork();
+    }).then(connected => {
+        if (connected) {
+            console.log("connected", connected.getSsid());
+        }
+        else {
+            console.log("no connected network");
+        }
+    }).then(() => {
         console.log("scanning");
         return conservify.scanNetworks();
     }).then(networks => {
