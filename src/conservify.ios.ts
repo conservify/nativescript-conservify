@@ -129,6 +129,11 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     }
 }
 
+interface ActiveTasks {
+    getTask(id: string): any;
+    removeTask(id: string): void;
+}
+
 class UploadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
@@ -136,7 +141,8 @@ class UploadListener extends NSObject implements WebTransferListener {
         return <UploadListener>super.new();
     }
 
-    public initMine(): UploadListener {
+    public initWithTasks(tasks: ActiveTasks): UploadListener {
+        this.tasks = tasks;
         return <UploadListener>this;
     }
 
@@ -149,7 +155,17 @@ class UploadListener extends NSObject implements WebTransferListener {
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        console.log("upload:onStarted", taskId, headers, contentType, body, statusCode);
+        console.log("upload:onComplete", taskId, headers, contentType, body, statusCode);
+
+        const task = this.tasks.getTask(taskId);
+
+        this.tasks.removeTask(taskId);
+
+        task.resolve({
+            headers: headers,
+            statusCode: statusCode,
+            body: getBody(),
+        });
     }
 
     public onErrorWithTaskId(taskId: string) {
@@ -164,7 +180,8 @@ class DownloadListener extends NSObject implements WebTransferListener {
         return <DownloadListener>super.new();
     }
 
-    public initMine(): DownloadListener {
+    public initWithTasks(tasks: ActiveTasks): DownloadListener {
+        this.tasks = tasks;
         return <DownloadListener>this;
     }
 
@@ -177,7 +194,30 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        console.log("download:onStarted", taskId, headers, contentType, body, statusCode);
+        console.log("download:onComplete", taskId, headers, contentType, body, statusCode);
+
+        const task = this.tasks.getTask(taskId);
+
+        this.tasks.removeTask(taskId);
+
+        function getBody() {
+            if (body) {
+                console.log(contentType);
+                if (contentType == "application/json") {
+                    return JSON.parse(body);
+                }
+                else {
+                    return body; // Buffer.from(body, "hex");
+                }
+            }
+            return null;
+        }
+
+        task.resolve({
+            headers: headers,
+            statusCode: statusCode,
+            body: getBody(),
+        });
     }
 
     public onErrorWithTaskId(taskId: string) {
@@ -185,7 +225,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 }
 
-export class Conservify extends Common {
+export class Conservify extends Common implements ActiveTasks {
     active: { [key: string]: any; };
     scan: any;
 
@@ -200,12 +240,20 @@ export class Conservify extends Common {
         this.scan = null;
     }
 
+    public getTask(id: string): any {
+        return this.active[id];
+    }
+
+    public removeTask(id: string) {
+        delete this.active[id];
+    }
+
     public start(serviceType: string) {
         console.log("initialize, ok");
 
         this.networkingListener = MyNetworkingListener.alloc().initMine();
-        this.uploadListener = UploadListener.alloc().initMine();
-        this.downloadListener = DownloadListener.alloc().initMine();
+        this.uploadListener = UploadListener.alloc().initWithTasks(this);
+        this.downloadListener = DownloadListener.alloc().initWithTasks(this);
 
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
         this.networking.serviceDiscovery.startWithServiceType(serviceType);
