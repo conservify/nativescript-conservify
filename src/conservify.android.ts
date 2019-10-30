@@ -96,11 +96,7 @@ export class Conservify extends Common {
         });
 
         this.uploadListener = new org.conservify.networking.WebTransferListener({
-            onStarted(taskId: string, headers: any) {
-                debug("upload:onStarted", taskId, headers);
-            },
-
-            onProgress(taskId: string, bytes: number, total: number) {
+            onProgress(taskId: string, headers: any, bytes: number, total: number) {
                 debug("upload:onProgress", taskId, bytes, total);
             },
 
@@ -114,13 +110,7 @@ export class Conservify extends Common {
         });
 
         this.downloadListener = new org.conservify.networking.WebTransferListener({
-            onStarted(taskId: string, headers: any) {
-                debug("download:onStarted", taskId, headers);
-
-                const task = active[taskId];
-            },
-
-            onProgress(taskId: string, bytes: number, total: number) {
+            onProgress(taskId: string, headers: any, bytes: number, total: number) {
                 debug("download:onProgress", taskId, bytes, total);
 
                 const { info } = active[taskId];
