@@ -38,6 +38,7 @@ function createViewModel() {
     }) .then((data) => {
         console.log("json", data);
     }).then(() => {
+        console.log("downloading...");
         return conservify.download({
             url: "http://192.168.0.100:6060/fk-bundled-fkb.bin",
             path: where.path,
@@ -49,17 +50,23 @@ function createViewModel() {
         const f = knownFolders.documents().getFolder("fk").getFile("test.bin");
         console.log("downloaded", f.path, f.size);
     }).then(() => {
+        console.log("protobuf...");
         return conservify.protobuf({
             url: "http://192.168.0.100:2380/fk/v1",
             body: null
         }).then((data) => {
-            console.log("protobuf", data.body.length);
+            if (data.body) {
+                console.log("protobuf", data.body.length);
+            }
+            else {
+                console.log("protobuf", "no body");
+            }
         });
     }).then(() => {
         console.log("scanning");
         return conservify.scanNetworks();
     }).then(networks => {
-        console.log("networks", networks)
+        console.log("networks", networks);
     }).then(() => {
         console.log("DONE");
         return { };

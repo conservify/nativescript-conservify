@@ -57,8 +57,7 @@ declare class ServiceDiscovery extends NSObject {
 }
 
 declare class Web extends NSObject {
-    public jsonWithInfo(info: WebTransfer): string;
-    public binaryWithInfo(info: WebTransfer): string;
+    public simpleWithInfo(info: WebTransfer): string;
     public downloadWithInfo(info: WebTransfer): string;
     public uploadWithInfo(info: WebTransfer): string;
 }
@@ -89,6 +88,8 @@ const ServiceInfoProto = global.ServiceInfo;
 const WebTransferProto = global.WebTransfer;
 const WifiNetworkProto = global.WifiNetwork;
 
+const debug = console.log;
+
 class MyNetworkingListener extends NSObject implements NetworkingListener {
     public static ObjCProtocols = [NetworkingListener];
 
@@ -101,31 +102,31 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     }
 
     public onStarted() {
-        console.log("onStarted");
+        debug("onStarted");
     }
 
     public onFoundServiceWithService(service: ServiceInfo) {
-        console.log("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+        debug("onFoundServiceWithService", service.type, service.name, service.host, service.port);
     }
 
     public onLostServiceWithService(service: ServiceInfo) {
-        console.log("onLostServiceWithService", service.type, service.name);
+        debug("onLostServiceWithService", service.type, service.name);
     }
 
     public onConnectionInfoWithConnected(connected: boolean) {
-        console.log("onConnectionInfoWithConnected", connected);
+        debug("onConnectionInfoWithConnected", connected);
     }
 
     public onConnectedNetworkWithNetwork(network: WifiNetwork) {
-        console.log("onConnectedNetworkWithNetwork", network);
+        debug("onConnectedNetworkWithNetwork", network);
     }
 
     public onNetworksFoundWithNetworks(networks: WifiNetworks) {
-        console.log("onNetworksFoundWithNetworks", networks);
+        debug("onNetworksFoundWithNetworks", networks);
     }
 
     public onNetworkScanError() {
-        console.log("onNetworkScanError");
+        debug("onNetworkScanError");
     }
 }
 
@@ -147,15 +148,15 @@ class UploadListener extends NSObject implements WebTransferListener {
     }
 
     public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
-        console.log("upload:onStarted", taskId, headers);
+        debug("upload:onStarted", taskId, headers);
     }
 
     public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
-        console.log("upload:onProgress", taskId, bytes, total);
+        debug("upload:onProgress", taskId, bytes, total);
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        console.log("upload:onComplete", taskId, headers, contentType, body, statusCode);
+        debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
 
         const task = this.tasks.getTask(taskId);
 
@@ -169,7 +170,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     }
 
     public onErrorWithTaskId(taskId: string) {
-        console.log("upload:onError", taskId);
+        debug("upload:onError", taskId);
     }
 }
 
@@ -186,28 +187,40 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
-        console.log("download:onStarted", taskId, headers);
+        debug("download:onStarted", taskId, headers);
     }
 
     public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
-        console.log("download:onProgress", taskId, bytes, total);
+        debug("download:onProgress", taskId, bytes, total);
+
+        const { progress } = this.tasks.getTask(taskId);
+
+        if (progress) {
+            progress(bytes, total);
+        }
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        console.log("download:onComplete", taskId, headers, contentType, body, statusCode);
+        debug("download:onComplete", taskId, headers, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
+        const { transfer } = task;
 
         this.tasks.removeTask(taskId);
 
         function getBody() {
             if (body) {
-                console.log(contentType);
-                if (contentType == "application/json") {
+                if (contentType.indexOf("application/json") >= 0) {
                     return JSON.parse(body);
                 }
                 else {
-                    return body; // Buffer.from(body, "hex");
+                    if (transfer.base64EncodeResponseBody) {
+                        console.log("decoding", body.length);
+                        const b = Buffer.from(body, "base64");
+                        console.log(b.length);
+                        return b;
+                    }
+                    return body;
                 }
             }
             return null;
@@ -221,7 +234,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onErrorWithTaskId(taskId: string) {
-        console.log("download:onError", taskId);
+        debug("download:onError", taskId);
     }
 }
 
@@ -249,7 +262,7 @@ export class Conservify extends Common implements ActiveTasks {
     }
 
     public start(serviceType: string) {
-        console.log("initialize, ok");
+        debug("initialize, ok");
 
         this.networkingListener = MyNetworkingListener.alloc().initMine();
         this.uploadListener = UploadListener.alloc().initWithTasks(this);
@@ -258,7 +271,7 @@ export class Conservify extends Common implements ActiveTasks {
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
         this.networking.serviceDiscovery.startWithServiceType(serviceType);
 
-        console.log("done, ready");
+        debug("done, ready");
 
         return Promise.resolve({ });
     }
@@ -274,35 +287,35 @@ export class Conservify extends Common implements ActiveTasks {
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
 
-            console.log("ID", transfer.id);
-
-            this.networking.web.jsonWithInfo(transfer);
+            this.networking.web.simpleWithInfo(transfer);
         });
     }
 
     public protobuf(info) {
         const transfer = WebTransfer.alloc().init();
         transfer.url = info.url;
+        transfer.base64EncodeResponseBody = true;
 
         if (info.body) {
-            const requestBody = Buffer.from(info.body).toString("hex");
+            const requestBody = Buffer.from(info.body).toString("base64");
             transfer.body = requestBody;
+            transfer.base64DecodeRequestBody = true;
         }
-
-        transfer.headerWithKeyValue("Content-Type", "text/plain");
 
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
 
-            this.networking.web.binaryWithInfo(transfer);
+            this.networking.web.simpleWithInfo(transfer);
         });
     }
 
@@ -314,6 +327,7 @@ export class Conservify extends Common implements ActiveTasks {
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
@@ -323,15 +337,19 @@ export class Conservify extends Common implements ActiveTasks {
     }
 
     public scanNetworks() {
-        this.networking.wifi.findConnectedNetwork();
-
-        this.networking.wifi.scan();
-
         return new Promise((resolve, reject) => {
             this.scan = {
                 resolve,
                 reject
             };
+
+            console.log("A");
+
+            this.networking.wifi.findConnectedNetwork();
+
+            console.log("B");
+
+            this.networking.wifi.scan();
         });
     }
 }
