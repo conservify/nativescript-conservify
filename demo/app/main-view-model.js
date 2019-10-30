@@ -11,6 +11,16 @@ function getMessage(counter) {
     }
 }
 
+class DiscoveryEvents {
+    onFoundService(info) {
+        console.log('onServiceFound', info);
+    }
+
+    onLostService(info) {
+        console.log('onServiceLost', info);
+    }
+}
+
 function createViewModel() {
     const viewModel = new Observable();
     viewModel.counter = 42;
@@ -21,7 +31,7 @@ function createViewModel() {
         viewModel.set("message", getMessage(viewModel.counter));
     };
 
-    const conservify = new Conservify();
+    const conservify = new Conservify(new DiscoveryEvents());
 
     const where = knownFolders.documents().getFolder("fk").getFile("test.bin");
 

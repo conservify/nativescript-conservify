@@ -12,6 +12,7 @@ const debug = (() => {
 })();
 
 export class Conservify extends Common {
+    discoveryEvents: any;
     active: { [key: string]: any; };
     scan: any;
     connected: any;
@@ -23,11 +24,12 @@ export class Conservify extends Common {
     dataListener: org.conservify.data.DataListener;
     fileSystem: org.conservify.data.FileSystem;
 
-    constructor() {
+    constructor(discoveryEvents) {
         super();
         this.active = {};
         this.scan = null;
         this.connected = null;
+        this.discoveryEvents = discoveryEvents;
     }
 
     public start(serviceType: string) {
@@ -39,10 +41,12 @@ export class Conservify extends Common {
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onFoundService(service: any) {
                 debug("onFoundService", service);
+                this.discoveryEvents.onFoundService(service);
             },
 
             onLostService(service: any) {
                 debug("onLostService", service);
+                this.discoveryEvents.onLostService(service);
             },
 
             onConnectionInfo(connected: any) {
