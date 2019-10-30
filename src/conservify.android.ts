@@ -98,14 +98,53 @@ export class Conservify extends Common {
         this.uploadListener = new org.conservify.networking.WebTransferListener({
             onProgress(taskId: string, headers: any, bytes: number, total: number) {
                 debug("upload:onProgress", taskId, bytes, total);
+
+                const { info } = active[taskId];
+                const { progress } = info;
+
+                if (progress) {
+                    progress(total, bytes);
+                }
             },
 
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
                 debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
+
+                const task = active[taskId];
+                const { transfer } = task;
+
+                function getBody() {
+                    if (body) {
+                        if (contentType.indexOf("application/json") >= 0) {
+                            return JSON.parse(body);
+                        }
+                        else {
+                            if (transfer.isBase64EncodeResponseBody()) {
+                                return Buffer.from(body, "base64");
+                            }
+                            return body;
+                        }
+                    }
+                    return null;
+                }
+
+                delete active[taskId];
+
+                task.resolve({
+                    headers: headers,
+                    statusCode: statusCode,
+                    body: getBody(),
+                });
             },
 
             onError(taskId: string) {
                 debug("upload:onError", taskId);
+
+                const task = active[taskId];
+
+                delete active[taskId];
+
+                task.reject({});
             },
         });
 
@@ -244,6 +283,23 @@ export class Conservify extends Common {
             };
 
             this.networking.getWeb().download(transfer);
+        });
+    }
+
+    public upload(info) {
+        const transfer = new org.conservify.networking.WebTransfer();
+        transfer.setUrl(info.url);
+        transfer.setPath(info.path);
+
+        return new Promise((resolve, reject) => {
+            this.active[transfer.getId()] = {
+                info,
+                transfer,
+                resolve,
+                reject,
+            };
+
+            this.networking.getWeb().upload(transfer);
         });
     }
 
