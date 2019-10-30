@@ -97,8 +97,7 @@ export class Conservify extends Common {
             onProgress(taskId: string, bytes: number, total: number) {
                 console.log("download:onProgress", taskId, bytes, total);
 
-                const task = active[taskId];
-                const { info } = active[task];
+                const { info } = active[taskId];
                 const { progress } = info;
 
                 if (progress) {
@@ -176,15 +175,14 @@ export class Conservify extends Common {
             transfer.header(key, (value as string));
         }
 
-        const id = this.networking.getWeb().json(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.getId()] = {
                 info,
                 resolve,
                 reject,
             };
+
+            this.networking.getWeb().json(transfer);
         });
     }
 
@@ -199,15 +197,14 @@ export class Conservify extends Common {
 
         transfer.header("Content-Type", "text/plain");
 
-        const id = this.networking.getWeb().binary(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.getId()] = {
                 info,
                 resolve,
                 reject,
             };
+
+            this.networking.getWeb().binary(transfer);
         });
     }
 
@@ -216,15 +213,14 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
-        const id = this.networking.getWeb().download(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.getId()] = {
                 info,
                 resolve,
                 reject,
             };
+
+            this.networking.getWeb().download(transfer);
         });
     }
 

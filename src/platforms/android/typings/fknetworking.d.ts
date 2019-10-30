@@ -20,9 +20,16 @@ declare namespace org {
             }
 
             export class WebTransfer {
+                getId(): string
+
                 setUrl(url: string)
+                getUrl(): string
+
                 setPath(url: string)
+                getPath(): string
+
                 setBody(body: string)
+                getBody(): string
 
                 header(key: string, value: string): WebTransfer
             }
