@@ -30,6 +30,8 @@ function createViewModel() {
     console.log('conservify', conservify);
 
     conservify.start("_fk._tcp").then(() => {
+        console.log("started, getting json");
+
         return conservify.json({
             url: "https://ifconfig.me/all.json"
         });

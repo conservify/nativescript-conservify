@@ -5,41 +5,50 @@ import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
 export class Conservify extends Common {
+    active: { [key: string]: any; };
+    scan: any;
+    networkingListener: org.conservify.networking.NetworkingListener;
+    downloadListener: org.conservify.networking.WebTransferListener;
+    uploadListener: org.conservify.networking.WebTransferListener;
+    networking: org.conservify.networking.Networking;
+    dataListener: org.conservify.data.DataListener;
+    fileSystem: org.conservify.data.FileSystem;
+
     constructor() {
         super();
         this.active = {};
         this.scan = null;
     }
 
-    public start(serviceType) {
+    public start(serviceType: string) {
         console.log("initialize");
 
         const active = this.active;
 
         this.networkingListener = new org.conservify.networking.NetworkingListener({
-            onFoundService(service) {
+            onFoundService(service: any) {
                 console.log("onFoundService", service);
             },
 
-            onLostService(service) {
+            onLostService(service: any) {
                 console.log("onLostService", service);
             },
 
-            onConnectionInfo(connected) {
+            onConnectionInfo(connected: any) {
                 console.log("onConnectionInfo", connected);
             },
 
-            onConnectedNetwork(network) {
+            onConnectedNetwork(network: any) {
                 console.log("onConnectedNetwork", network.getSsid());
             },
 
-            onNetworksFound(networks) {
+            onNetworksFound(networks: any) {
                 console.log("onNetworksFound", networks, networks.getNetworks());
 
-                const found = [];
+                const found: { ssid: string }[] = [];
                 for (let i = 0; i < networks.getNetworks().size(); ++i) {
-                    const n = network.getNetworks()[i];
-                    found.append({
+                    const n = networks.getNetworks()[i];
+                    found.push({
                         ssid: n.getSsid()
                     });
                 }
@@ -61,33 +70,34 @@ export class Conservify extends Common {
         });
 
         this.uploadListener = new org.conservify.networking.WebTransferListener({
-            onStarted(task, headers) {
-                console.log("upload:onStarted", task, headers);
+            onStarted(taskId: string, headers: any) {
+                console.log("upload:onStarted", taskId, headers);
             },
 
-            onProgress(task, bytes, total) {
-                console.log("upload:onProgress", task, bytes, total);
+            onProgress(taskId: string, bytes: number, total: number) {
+                console.log("upload:onProgress", taskId, bytes, total);
             },
 
-            onComplete(task, headers, body, statusCode) {
-                console.log("upload:onComplete", task, headers, body, statusCode);
+            onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+                console.log("upload:onComplete", taskId, headers, contentType, body, statusCode);
             },
 
-            onError(task) {
-                console.log("upload:onError", task);
+            onError(taskId: string) {
+                console.log("upload:onError", taskId);
             },
         });
 
         this.downloadListener = new org.conservify.networking.WebTransferListener({
-            onStarted(task, headers) {
-                console.log("download:onStarted", task, headers);
+            onStarted(taskId: string, headers: any) {
+                console.log("download:onStarted", taskId, headers);
 
-                const task = active[task];
+                const task = active[taskId];
             },
 
-            onProgress(task, bytes, total) {
-                console.log("download:onProgress", task, bytes, total);
+            onProgress(taskId: string, bytes: number, total: number) {
+                console.log("download:onProgress", taskId, bytes, total);
 
+                const task = active[taskId];
                 const { info } = active[task];
                 const { progress } = info;
 
@@ -96,8 +106,8 @@ export class Conservify extends Common {
                 }
             },
 
-            onComplete(task, headers, contentType, body, statusCode) {
-                console.log("download:onComplete", task, headers, contentType, body, statusCode);
+            onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+                console.log("download:onComplete", taskId, headers, contentType, body, statusCode);
 
                 function getBody() {
                     if (body) {
@@ -111,9 +121,9 @@ export class Conservify extends Common {
                     return null;
                 }
 
-                const task = active[task];
+                const task = active[taskId];
 
-                delete active[task];
+                delete active[taskId];
 
                 task.resolve({
                     headers: headers,
@@ -122,30 +132,30 @@ export class Conservify extends Common {
                 });
             },
 
-            onError(task) {
-                console.log("download:onError", task);
+            onError(taskId: string) {
+                console.log("download:onError", taskId);
 
-                const task = active[task];
+                const task = active[taskId];
 
-                delete active[task];
+                delete active[taskId];
 
                 task.reject({});
             },
         });
 
         this.dataListener = new org.conservify.data.DataListener({
-            onFileInfo(path, info) {
+            onFileInfo(path: string, info: any) {
                 console.log("fs:onFileInfo", path, info);
-            }
+            },
 
-            onFileRecords(path, records) {
+            onFileRecords(path: string, records: any) {
                 console.log("fs:onFileRecords", path, records);
-            }
+            },
 
-            onFileAnalysis(path, analysis) {
+            onFileAnalysis(path: string, analysis: any) {
                 console.log("fs:onFileAnalysis", path, analysis);
-            }
-        })
+            },
+        });
 
         this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.dataListener);
 
@@ -163,7 +173,7 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
 
         for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, value);
+            transfer.header(key, (value as string));
         }
 
         const id = this.networking.getWeb().json(transfer);
@@ -183,7 +193,7 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
 
         if (info.body) {
-            const requestBody = new Buffer.from(info.body).toString("hex");
+            const requestBody = Buffer.from(info.body).toString("hex");
             transfer.setBody(requestBody);
         }
 
