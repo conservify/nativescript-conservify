@@ -53,12 +53,19 @@ function createViewModel() {
             url: "http://192.168.0.100:6060/fk-bundled-fkb.bin",
             path: where.path,
             progress: (total, copied) => {
-                console.log("progress", total, copied);
+                console.log("download progress", total, copied);
             },
         });
     }).then(() => {
         const f = knownFolders.documents().getFolder("fk").getFile("test.bin");
-        console.log("downloaded", f.path, f.size);
+        console.log("downloaded", f.path, f.size, "uploading...");
+        return conservify.upload({
+            url: "http://192.168.0.100:6060/upload",
+            path: f.path,
+            progress: (total, copied) => {
+                console.log("upload progress", total, copied);
+            },
+        });
     }).then(() => {
         console.log("protobuf...");
         return conservify.protobuf({

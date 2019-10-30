@@ -179,6 +179,21 @@ class UploadListener extends NSObject implements WebTransferListener {
 
         this.tasks.removeTask(taskId);
 
+        function getBody() {
+            if (body) {
+                if (contentType.indexOf("application/json") >= 0) {
+                    return JSON.parse(body);
+                }
+                else {
+                    if (transfer.base64EncodeResponseBody) {
+                        return Buffer.from(body, "base64");
+                    }
+                    return body;
+                }
+            }
+            return null;
+        }
+
         task.resolve({
             headers: headers,
             statusCode: statusCode,
@@ -359,6 +374,23 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         });
     }
 
+    public upload(info) {
+        const transfer = WebTransfer.alloc().init();
+        transfer.url = info.url;
+        transfer.path = info.path;
+
+        return new Promise((resolve, reject) => {
+            this.active[transfer.id] = {
+                info,
+                transfer,
+                resolve,
+                reject,
+            };
+
+            this.networking.web.uploadWithInfo(transfer);
+        });
+    }
+    
     public getConnectedNetworkPromise(): Promise {
         return this.connected;
     }
