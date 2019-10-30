@@ -271,15 +271,16 @@ export class Conservify extends Common implements ActiveTasks {
             transfer.headerWithKeyValue(key, (value as string));
         }
 
-        const id = this.networking.web.jsonWithInfo(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.id] = {
                 info,
                 resolve,
                 reject,
             };
+
+            console.log("ID", transfer.id);
+
+            this.networking.web.jsonWithInfo(transfer);
         });
     }
 
@@ -294,15 +295,14 @@ export class Conservify extends Common implements ActiveTasks {
 
         transfer.headerWithKeyValue("Content-Type", "text/plain");
 
-        const id = this.networking.web.binaryWithInfo(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.id] = {
                 info,
                 resolve,
                 reject,
             };
+
+            this.networking.web.binaryWithInfo(transfer);
         });
     }
 
@@ -311,15 +311,16 @@ export class Conservify extends Common implements ActiveTasks {
         transfer.url = info.url;
         transfer.path = info.path;
 
-        const id = this.networking.web.downloadWithInfo(transfer);
-
         return new Promise((resolve, reject) => {
-            this.active[id] = {
-                id,
+            this.active[transfer.id] = {
                 info,
                 resolve,
                 reject,
             };
+
+            console.log("ID", transfer.id);
+
+            this.networking.web.downloadWithInfo(transfer);
         });
     }
 
