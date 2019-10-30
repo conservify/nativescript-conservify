@@ -66,7 +66,8 @@ function createViewModel() {
                 console.log("upload progress", total, copied);
             },
         });
-    }).then(() => {
+    }).then(uploaded => {
+        console.log("uploaded", uploaded)
         console.log("protobuf...");
         return conservify.protobuf({
             url: "http://192.168.0.100:2380/fk/v1",

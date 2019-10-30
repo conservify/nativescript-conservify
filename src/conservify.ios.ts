@@ -168,7 +168,7 @@ class UploadListener extends NSObject implements WebTransferListener {
         const { progress } = info;
 
         if (progress) {
-            progress(bytes, total);
+            progress(bytes, total, info);
         }
     }
 
@@ -176,6 +176,7 @@ class UploadListener extends NSObject implements WebTransferListener {
         debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
 
         const task = this.tasks.getTask(taskId);
+        const { info } = task;
 
         this.tasks.removeTask(taskId);
 
@@ -195,8 +196,9 @@ class UploadListener extends NSObject implements WebTransferListener {
         }
 
         task.resolve({
-            headers: headers,
-            statusCode: statusCode,
+            info,
+            headers,
+            statusCode,
             body: getBody(),
         });
     }
@@ -205,10 +207,13 @@ class UploadListener extends NSObject implements WebTransferListener {
         debug("upload:onError", taskId);
 
         const task = this.tasks.getTask(taskId);
+        const { info } = task;
 
         this.tasks.removeTask(taskId);
 
-        task.reject({});
+        task.reject({
+            info
+        });
     }
 }
 
@@ -239,7 +244,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
         debug("download:onComplete", taskId, headers, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
-        const { transfer } = task;
+        const { info, transfer } = task;
 
         this.tasks.removeTask(taskId);
 
@@ -259,8 +264,9 @@ class DownloadListener extends NSObject implements WebTransferListener {
         }
 
         task.resolve({
-            headers: headers,
-            statusCode: statusCode,
+            info,
+            headers,
+            statusCode,
             body: getBody(),
         });
     }
@@ -269,10 +275,13 @@ class DownloadListener extends NSObject implements WebTransferListener {
         debug("download:onError", taskId);
 
         const task = this.tasks.getTask(taskId);
+        const { info } = task;
 
         this.tasks.removeTask(taskId);
 
-        task.reject({});
+        task.reject({
+            info
+        });
     }
 }
 

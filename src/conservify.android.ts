@@ -103,7 +103,7 @@ export class Conservify extends Common {
                 const { progress } = info;
 
                 if (progress) {
-                    progress(total, bytes);
+                    progress(total, bytes, info);
                 }
             },
 
@@ -111,7 +111,7 @@ export class Conservify extends Common {
                 debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
 
                 const task = active[taskId];
-                const { transfer } = task;
+                const { info, transfer } = task;
 
                 function getBody() {
                     if (body) {
@@ -131,8 +131,9 @@ export class Conservify extends Common {
                 delete active[taskId];
 
                 task.resolve({
-                    headers: headers,
-                    statusCode: statusCode,
+                    info,
+                    headers,
+                    statusCode,
                     body: getBody(),
                 });
             },
@@ -141,10 +142,13 @@ export class Conservify extends Common {
                 debug("upload:onError", taskId);
 
                 const task = active[taskId];
+                const { info } = task;
 
                 delete active[taskId];
 
-                task.reject({});
+                task.reject({
+                    info,
+                });
             },
         });
 
@@ -164,7 +168,7 @@ export class Conservify extends Common {
                 debug("download:onComplete", taskId, headers, contentType, body, statusCode);
 
                 const task = active[taskId];
-                const { transfer } = task;
+                const { info, transfer } = task;
 
                 function getBody() {
                     if (body) {
@@ -184,8 +188,9 @@ export class Conservify extends Common {
                 delete active[taskId];
 
                 task.resolve({
-                    headers: headers,
-                    statusCode: statusCode,
+                    info,
+                    headers,
+                    statusCode,
                     body: getBody(),
                 });
             },
@@ -194,10 +199,13 @@ export class Conservify extends Common {
                 debug("download:onError", taskId);
 
                 const task = active[taskId];
+                const { info } = task;
 
                 delete active[taskId];
 
-                task.reject({});
+                task.reject({
+                    info
+                });
             },
         });
 
