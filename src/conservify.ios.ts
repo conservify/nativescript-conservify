@@ -87,17 +87,26 @@ const WebTransferListenerProto = global.WebTransferListener;
 const ServiceInfoProto = global.ServiceInfo;
 const WebTransferProto = global.WebTransfer;
 const WifiNetworkProto = global.WifiNetwork;
+const WifiManagerProto = global.WifiManager;
 
 const debug = console.log;
 
+interface OtherPromises {
+    getConnectedNetworkPromise(): Promise;
+    getScanPromise(): Promise;
+}
+
 class MyNetworkingListener extends NSObject implements NetworkingListener {
     public static ObjCProtocols = [NetworkingListener];
+
+    promises: OtherPromises;
 
 	  static alloc(): MyNetworkingListener {
         return <MyNetworkingListener>super.new();
     }
 
-    public initMine(): MyNetworkingListener {
+    public initWithPromises(promises: OtherPromises): MyNetworkingListener {
+        this.promises = promises;
         return <MyNetworkingListener>this;
     }
 
@@ -119,14 +128,20 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 
     public onConnectedNetworkWithNetwork(network: WifiNetwork) {
         debug("onConnectedNetworkWithNetwork", network);
+
+        this.promises.getConnectedNetworkPromise().resolve(network);
     }
 
     public onNetworksFoundWithNetworks(networks: WifiNetworks) {
         debug("onNetworksFoundWithNetworks", networks);
+
+        this.promises.getScanPromise().resolve(networks);
     }
 
     public onNetworkScanError() {
         debug("onNetworkScanError");
+
+        this.promises.getScanPromise().reject();
     }
 }
 
@@ -153,6 +168,13 @@ class UploadListener extends NSObject implements WebTransferListener {
 
     public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
         debug("upload:onProgress", taskId, bytes, total);
+
+        const { info } = this.tasks.getTask(taskId);
+        const { progress } = info;
+
+        if (progress) {
+            progress(bytes, total);
+        }
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
@@ -171,6 +193,12 @@ class UploadListener extends NSObject implements WebTransferListener {
 
     public onErrorWithTaskId(taskId: string) {
         debug("upload:onError", taskId);
+
+        const task = this.tasks.getTask(taskId);
+
+        this.tasks.removeTask(taskId);
+
+        task.reject({});
     }
 }
 
@@ -193,7 +221,8 @@ class DownloadListener extends NSObject implements WebTransferListener {
     public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
         debug("download:onProgress", taskId, bytes, total);
 
-        const { progress } = this.tasks.getTask(taskId);
+        const { info } = this.tasks.getTask(taskId);
+        const { progress } = info;
 
         if (progress) {
             progress(bytes, total);
@@ -215,10 +244,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
                 }
                 else {
                     if (transfer.base64EncodeResponseBody) {
-                        console.log("decoding", body.length);
-                        const b = Buffer.from(body, "base64");
-                        console.log(b.length);
-                        return b;
+                        return Buffer.from(body, "base64");
                     }
                     return body;
                 }
@@ -235,10 +261,16 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
     public onErrorWithTaskId(taskId: string) {
         debug("download:onError", taskId);
+
+        const task = this.tasks.getTask(taskId);
+
+        this.tasks.removeTask(taskId);
+
+        task.reject({});
     }
 }
 
-export class Conservify extends Common implements ActiveTasks {
+export class Conservify extends Common implements ActiveTasks, OtherPromises {
     active: { [key: string]: any; };
     scan: any;
 
@@ -264,7 +296,7 @@ export class Conservify extends Common implements ActiveTasks {
     public start(serviceType: string) {
         debug("initialize, ok");
 
-        this.networkingListener = MyNetworkingListener.alloc().initMine();
+        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this);
         this.uploadListener = UploadListener.alloc().initWithTasks(this);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this);
 
@@ -336,18 +368,31 @@ export class Conservify extends Common implements ActiveTasks {
         });
     }
 
+    public getConnectedNetworkPromise(): Promise {
+        return this.connected;
+    }
+
+    public getScanPromise(): Promise {
+        return this.scan;
+    }
+
+    public findConnectedNetwork() {
+        return new Promise((resolve, reject) => {
+            this.connected = {
+                resolve,
+                reject
+            };
+
+            this.networking.wifi.findConnectedNetwork();
+        });
+    }
+
     public scanNetworks() {
         return new Promise((resolve, reject) => {
             this.scan = {
                 resolve,
                 reject
             };
-
-            console.log("A");
-
-            this.networking.wifi.findConnectedNetwork();
-
-            console.log("B");
 
             this.networking.wifi.scan();
         });
