@@ -31,6 +31,9 @@ declare namespace org {
                 setBody(body: string)
                 getBody(): string
 
+                setBase64DecodeRequestBody(value: boolean);
+                setBase64EncodeResponseBody(value: boolean);
+
                 header(key: string, value: string): WebTransfer
             }
 

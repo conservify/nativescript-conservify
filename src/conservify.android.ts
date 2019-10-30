@@ -122,19 +122,23 @@ export class Conservify extends Common {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
                 debug("download:onComplete", taskId, headers, contentType, body, statusCode);
 
+                const task = active[taskId];
+                const { transfer } = task;
+
                 function getBody() {
                     if (body) {
                         if (contentType.indexOf("application/json") >= 0) {
                             return JSON.parse(body);
                         }
                         else {
-                            return Buffer.from(body, "hex");
+                            if (transfer.isBase64EncodeResponseBody()) {
+                                return Buffer.from(body, "base64");
+                            }
+                            return body;
                         }
                     }
                     return null;
                 }
-
-                const task = active[taskId];
 
                 delete active[taskId];
 
@@ -192,6 +196,7 @@ export class Conservify extends Common {
         return new Promise((resolve, reject) => {
             this.active[transfer.getId()] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
@@ -203,17 +208,18 @@ export class Conservify extends Common {
     public protobuf(info) {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setUrl(info.url);
+        transfer.setBase64EncodeResponseBody(true);
 
         if (info.body) {
-            const requestBody = Buffer.from(info.body).toString("hex");
+            const requestBody = Buffer.from(info.body).toString("base64");
             transfer.setBody(requestBody);
+            transfer.setBase64DecodeRequestBody(true);
         }
-
-        transfer.header("Content-Type", "text/plain");
 
         return new Promise((resolve, reject) => {
             this.active[transfer.getId()] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
@@ -230,6 +236,7 @@ export class Conservify extends Common {
         return new Promise((resolve, reject) => {
             this.active[transfer.getId()] = {
                 info,
+                transfer,
                 resolve,
                 reject,
             };
