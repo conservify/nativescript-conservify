@@ -42,7 +42,7 @@ declare class WebTransfer extends NSObject {
     public path: string;
     public body: any;
 
-    public header(key: string, value: string): WebTransfer;
+    public headerWithKeyValue(key: string, value: string): WebTransfer;
 }
 
 declare class ServiceInfo extends NSObject {
@@ -221,7 +221,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onErrorWithTaskId(taskId: string) {
-        console.log("upload:onError", taskId);
+        console.log("download:onError", taskId);
     }
 }
 
@@ -268,7 +268,7 @@ export class Conservify extends Common implements ActiveTasks {
         transfer.url = info.url;
 
         for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+            transfer.headerWithKeyValue(key, (value as string));
         }
 
         const id = this.networking.web.jsonWithInfo(transfer);
@@ -292,7 +292,7 @@ export class Conservify extends Common implements ActiveTasks {
             transfer.body = requestBody;
         }
 
-        transfer.header("Content-Type", "text/plain");
+        transfer.headerWithKeyValue("Content-Type", "text/plain");
 
         const id = this.networking.web.binaryWithInfo(transfer);
 
