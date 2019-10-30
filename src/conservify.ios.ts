@@ -15,8 +15,7 @@ declare var NetworkingListener: {
 }
 
 interface WebTransferListener {
-    onStartedWithTaskIdHeaders(taskId: string, headers: any): void;
-    onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number): void;
+    onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number): void;
     onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number): void;
     onErrorWithTaskId(taskId: string): void;
 }
@@ -162,11 +161,7 @@ class UploadListener extends NSObject implements WebTransferListener {
         return <UploadListener>this;
     }
 
-    public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
-        debug("upload:onStarted", taskId, headers);
-    }
-
-    public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
+    public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
         debug("upload:onProgress", taskId, bytes, total);
 
         const { info } = this.tasks.getTask(taskId);
@@ -214,11 +209,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
         return <DownloadListener>this;
     }
 
-    public onStartedWithTaskIdHeaders(taskId: string, headers: any) {
-        debug("download:onStarted", taskId, headers);
-    }
-
-    public onProgressWithTaskIdBytesTotal(taskId: string, bytes: number, total: number) {
+    public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
         debug("download:onProgress", taskId, bytes, total);
 
         const { info } = this.tasks.getTask(taskId);
