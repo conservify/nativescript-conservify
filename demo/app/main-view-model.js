@@ -52,8 +52,8 @@ function createViewModel() {
         return conservify.download({
             url: "http://192.168.0.100:6060/fk-bundled-fkb.bin",
             path: where.path,
-            progress: (total, copied) => {
-                console.log("download progress", total, copied);
+            progress: (total, copied, info) => {
+                console.log("download progress", info.url, total, copied);
             },
         });
     }).then(() => {
@@ -62,8 +62,8 @@ function createViewModel() {
         return conservify.upload({
             url: "http://192.168.0.100:6060/upload",
             path: f.path,
-            progress: (total, copied) => {
-                console.log("upload progress", total, copied);
+            progress: (total, copied, info) => {
+                console.log("upload progress", info.url, total, copied);
             },
         });
     }).then(uploaded => {

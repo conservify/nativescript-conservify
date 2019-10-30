@@ -160,7 +160,7 @@ export class Conservify extends Common {
                 const { progress } = info;
 
                 if (progress) {
-                    progress(total, bytes);
+                    progress(total, bytes, info);
                 }
             },
 
