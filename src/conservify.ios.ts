@@ -318,8 +318,6 @@ export class Conservify extends Common implements ActiveTasks {
                 reject,
             };
 
-            console.log("ID", transfer.id);
-
             this.networking.web.downloadWithInfo(transfer);
         });
     }
