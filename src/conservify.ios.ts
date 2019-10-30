@@ -17,7 +17,7 @@ declare var NetworkingListener: {
 interface WebTransferListener {
     onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number): void;
     onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number): void;
-    onErrorWithTaskId(taskId: string): void;
+    onErrorWithTaskIdMessage(taskId: string, message: string): void;
 }
 
 declare var WebTransferListener: {
@@ -203,16 +203,17 @@ class UploadListener extends NSObject implements WebTransferListener {
         });
     }
 
-    public onErrorWithTaskId(taskId: string) {
+    public onErrorWithTaskIdMessage(taskId: string, message: string) {
         debug("upload:onError", taskId);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
 
-        this.tasks.removeTask(taskId);
+        this.tasks.removeTask(taskId, message);
 
         task.reject({
-            info
+            info,
+            message
         });
     }
 }
@@ -271,8 +272,8 @@ class DownloadListener extends NSObject implements WebTransferListener {
         });
     }
 
-    public onErrorWithTaskId(taskId: string) {
-        debug("download:onError", taskId);
+    public onErrorWithTaskIdMessage(taskId: string, message: string) {
+        debug("download:onError", taskId, message);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
@@ -280,7 +281,8 @@ class DownloadListener extends NSObject implements WebTransferListener {
         this.tasks.removeTask(taskId);
 
         task.reject({
-            info
+            info,
+            message
         });
     }
 }
