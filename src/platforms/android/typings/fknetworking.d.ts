@@ -22,6 +22,9 @@ declare namespace org {
             export class WebTransfer {
                 getId(): string
 
+                setMethod(method: string)
+                getMethod(): string
+
                 setUrl(url: string)
                 getUrl(): string
 
