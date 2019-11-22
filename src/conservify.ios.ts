@@ -33,10 +33,11 @@ declare class WifiNetworks extends NSObject {
 }
 
 declare class WebTransfer extends NSObject {
-	  static alloc(): WebTransfer;
+	static alloc(): WebTransfer;
 
-	  static new(): WebTransfer;
+	static new(): WebTransfer;
 
+    public method: string;
     public url: string;
     public path: string;
     public body: any;
@@ -213,7 +214,7 @@ class UploadListener extends NSObject implements WebTransferListener {
 
         task.reject({
             info,
-            message
+            message,
         });
     }
 }
@@ -282,7 +283,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
         task.reject({
             info,
-            message
+            message,
         });
     }
 }

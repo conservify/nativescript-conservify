@@ -11,11 +11,22 @@ const debug = (() => {
     return () => { };
 })();
 
+function toJsHeaders(headers) {
+	const jsHeaders = {};
+	const iter = headers.entrySet().iterator();
+	while (iter.hasNext()) {
+		const entry = iter.next();
+		const key = entry.getKey();
+		jsHeaders[key.toLowerCase()] = entry.getValue();
+	}
+	return jsHeaders;
+}
+
 export class Conservify extends Common {
-    discoveryEvents: any;
-    active: { [key: string]: any; };
-    scan: any;
-    connected: any;
+	discoveryEvents: any;
+	active: { [key: string]: any; };
+	scan: any;
+	connected: any;
 
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;
@@ -142,14 +153,14 @@ export class Conservify extends Common {
 
                 task.resolve({
                     info,
-                    headers,
+                    headers: toJsHeaders(headers),
                     statusCode,
                     body: getBody(),
                 });
             },
 
-            onError(taskId: string) {
-                debug("upload:onError", taskId);
+            onError(taskId: string, message: string) {
+                debug("upload:onError", taskId, message);
 
                 const task = active[taskId];
                 const { info } = task;
@@ -158,6 +169,7 @@ export class Conservify extends Common {
 
                 task.reject({
                     info,
+					message,
                 });
             },
         });
@@ -199,14 +211,14 @@ export class Conservify extends Common {
 
                 task.resolve({
                     info,
-                    headers,
+                    headers: toJsHeaders(headers),
                     statusCode,
                     body: getBody(),
                 });
             },
 
-            onError(taskId: string) {
-                debug("download:onError", taskId);
+            onError(taskId: string, message: string) {
+                debug("download:onError", taskId, message);
 
                 const task = active[taskId];
                 const { info } = task;
@@ -214,7 +226,8 @@ export class Conservify extends Common {
                 delete active[taskId];
 
                 task.reject({
-                    info
+                    info,
+					message,
                 });
             },
         });
