@@ -41,12 +41,22 @@ export class Conservify extends Common {
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onFoundService(service: any) {
                 debug("onFoundService", service);
-                owner.discoveryEvents.onFoundService(service);
+                owner.discoveryEvents.onFoundService({
+					name: service.getName(),
+					type: service.getType(),
+					host: service.getAddress(),
+					port: service.getPort(),
+				});
             },
 
             onLostService(service: any) {
                 debug("onLostService", service);
-                owner.discoveryEvents.onLostService(service);
+                owner.discoveryEvents.onLostService({
+					name: service.getName(),
+					type: service.getType(),
+					host: service.getAddress(), // Probably missing.
+					port: service.getPort(),    // Probably missing.
+				});
             },
 
             onConnectionInfo(connected: any) {
