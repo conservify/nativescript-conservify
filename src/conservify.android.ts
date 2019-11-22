@@ -41,12 +41,12 @@ export class Conservify extends Common {
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onFoundService(service: any) {
                 debug("onFoundService", service);
-                this.discoveryEvents.onFoundService(service);
+                owner.discoveryEvents.onFoundService(service);
             },
 
             onLostService(service: any) {
                 debug("onLostService", service);
-                this.discoveryEvents.onLostService(service);
+                owner.discoveryEvents.onLostService(service);
             },
 
             onConnectionInfo(connected: any) {
@@ -236,6 +236,7 @@ export class Conservify extends Common {
 
     public json(info) {
         const transfer = new org.conservify.networking.WebTransfer();
+		transfer.setMethod(info.method);
         transfer.setUrl(info.url);
 
         for (let [key, value] of Object.entries(info.headers || { })) {
@@ -256,8 +257,13 @@ export class Conservify extends Common {
 
     public protobuf(info) {
         const transfer = new org.conservify.networking.WebTransfer();
+		transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setBase64EncodeResponseBody(true);
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.header(key, (value as string));
+        }
 
         if (info.body) {
             const requestBody = Buffer.from(info.body).toString("base64");
@@ -279,8 +285,13 @@ export class Conservify extends Common {
 
     public download(info) {
         const transfer = new org.conservify.networking.WebTransfer();
+		transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.header(key, (value as string));
+        }
 
         return new Promise((resolve, reject) => {
             this.active[transfer.getId()] = {
@@ -296,8 +307,13 @@ export class Conservify extends Common {
 
     public upload(info) {
         const transfer = new org.conservify.networking.WebTransfer();
+		transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.header(key, (value as string));
+        }
 
         return new Promise((resolve, reject) => {
             this.active[transfer.getId()] = {

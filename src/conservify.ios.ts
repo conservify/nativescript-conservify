@@ -296,10 +296,11 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     uploadListener: WebTransferListener;
     downloadListener: WebTransferListener;
 
-    constructor() {
+    constructor(discoveryEvents) {
         super();
         this.active = {};
         this.scan = null;
+        this.discoveryEvents = discoveryEvents;
     }
 
     public getTask(id: string): any {
@@ -327,6 +328,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public json(info) {
         const transfer = WebTransfer.alloc().init();
+		transfer.method = info.method;
         transfer.url = info.url;
 
         for (let [key, value] of Object.entries(info.headers || { })) {
@@ -347,8 +349,13 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public protobuf(info) {
         const transfer = WebTransfer.alloc().init();
+		transfer.method = info.method;
         transfer.url = info.url;
         transfer.base64EncodeResponseBody = true;
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.headerWithKeyValue(key, (value as string));
+        }
 
         if (info.body) {
             const requestBody = Buffer.from(info.body).toString("base64");
@@ -370,8 +377,13 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public download(info) {
         const transfer = WebTransfer.alloc().init();
+		transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.headerWithKeyValue(key, (value as string));
+        }
 
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
@@ -387,8 +399,13 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public upload(info) {
         const transfer = WebTransfer.alloc().init();
+		transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.headerWithKeyValue(key, (value as string));
+        }
 
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
@@ -401,7 +418,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
             this.networking.web.uploadWithInfo(transfer);
         });
     }
-    
+
     public getConnectedNetworkPromise(): Promise {
         return this.connected;
     }
