@@ -92,6 +92,7 @@ const WifiManagerProto = global.WifiManager;
 const debug = console.log;
 
 interface OtherPromises {
+    getDiscoveryEvents(): any;
     getConnectedNetworkPromise(): Promise;
     getScanPromise(): Promise;
 }
@@ -116,10 +117,22 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 
     public onFoundServiceWithService(service: ServiceInfo) {
         debug("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+        this.promises.getDiscoveryEvents().onFoundService({
+					  name: service.name,
+					  type: service.type,
+					  host: service.host,
+					  port: service.port,
+				});
     }
 
     public onLostServiceWithService(service: ServiceInfo) {
         debug("onLostServiceWithService", service.type, service.name);
+        this.promises.getDiscoveryEvents().onLostService({
+					  name: service.name,
+					  type: service.type,
+					  host: service.host, // Probably missing.
+					  port: service.port,    // Probably missing.
+				});
     }
 
     public onConnectionInfoWithConnected(connected: boolean) {
@@ -296,6 +309,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     networkingListener: MyNetworkingListener;
     uploadListener: WebTransferListener;
     downloadListener: WebTransferListener;
+    discoveryEvents: any;
 
     constructor(discoveryEvents) {
         super();
@@ -418,6 +432,10 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
             this.networking.web.uploadWithInfo(transfer);
         });
+    }
+
+    public getDiscoveryEvents(): any {
+        return this.discoveryEvents;
     }
 
     public getConnectedNetworkPromise(): Promise {
