@@ -2,6 +2,7 @@ import { Common } from './conservify.common';
 
 interface NetworkingListener {
     onStarted(): void
+    ondiscoveryfailed(): void
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
     onConnectionInfoWithConnected(connected: boolean): void;
@@ -92,9 +93,10 @@ const WifiManagerProto = global.WifiManager;
 const debug = console.log;
 
 interface OtherPromises {
-    getDiscoveryEvents(): any;
+    getStartedPromise(): Promise;
     getConnectedNetworkPromise(): Promise;
     getScanPromise(): Promise;
+    getDiscoveryEvents(): any;
 }
 
 class MyNetworkingListener extends NSObject implements NetworkingListener {
@@ -113,6 +115,14 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 
     public onStarted() {
         debug("onStarted");
+
+        this.promises.getStartedPromise().resolve();
+    }
+
+    public onDiscoveryFailed() {
+        debug("onDiscoveryFailed");
+
+        this.promises.getStartedPromise().reject();
     }
 
     public onFoundServiceWithService(service: ServiceInfo) {
@@ -304,6 +314,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
     active: { [key: string]: any; };
     scan: any;
+    started: any;
 
     networking: Networking;
     networkingListener: MyNetworkingListener;
@@ -315,6 +326,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         super();
         this.active = {};
         this.scan = null;
+        this.started = null;
         this.discoveryEvents = discoveryEvents;
     }
 
@@ -327,23 +339,28 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public start(serviceType: string) {
-        debug("initialize, ok");
-
         this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this);
         this.uploadListener = UploadListener.alloc().initWithTasks(this);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this);
-
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
-        this.networking.serviceDiscovery.startWithServiceType(serviceType);
 
-        debug("done, ready");
+        return new Promise((resolve, reject) => {
+            debug("initialize, ok");
 
-        return Promise.resolve({ });
+            this.started = {
+                resolve,
+                reject
+            };
+
+            this.networking.serviceDiscovery.startWithServiceType(serviceType);
+
+            debug("starting...");
+        });
     }
 
     public json(info) {
         const transfer = WebTransfer.alloc().init();
-		transfer.method = info.method;
+        transfer.method = info.method;
         transfer.url = info.url;
 
         for (let [key, value] of Object.entries(info.headers || { })) {
@@ -364,7 +381,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public protobuf(info) {
         const transfer = WebTransfer.alloc().init();
-		transfer.method = info.method;
+        transfer.method = info.method;
         transfer.url = info.url;
         transfer.base64EncodeResponseBody = true;
 
@@ -392,7 +409,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public download(info) {
         const transfer = WebTransfer.alloc().init();
-		transfer.method = info.method;
+        transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
 
@@ -414,7 +431,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public upload(info) {
         const transfer = WebTransfer.alloc().init();
-		transfer.method = info.method;
+        transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
 
@@ -440,6 +457,10 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public getConnectedNetworkPromise(): Promise {
         return this.connected;
+    }
+
+    public getStartedPromise(): Promise {
+        return this.started;
     }
 
     public getScanPromise(): Promise {

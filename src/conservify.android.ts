@@ -23,10 +23,11 @@ function toJsHeaders(headers) {
 }
 
 export class Conservify extends Common {
-	discoveryEvents: any;
-	active: { [key: string]: any; };
-	scan: any;
-	connected: any;
+    discoveryEvents: any;
+    active: { [key: string]: any; };
+    scan: any;
+    started: any;
+    connected: any;
 
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;
@@ -39,6 +40,7 @@ export class Conservify extends Common {
         super();
         this.active = {};
         this.scan = null;
+        this.started = null;
         this.connected = null;
         this.discoveryEvents = discoveryEvents;
     }
@@ -50,24 +52,32 @@ export class Conservify extends Common {
         const active = this.active;
 
         this.networkingListener = new org.conservify.networking.NetworkingListener({
+            onStarted() {
+                owner.started.resolve();
+            }
+
+            onDiscoveryFailed() {
+                owner.started.reject();
+            }
+
             onFoundService(service: any) {
                 debug("onFoundService", service);
                 owner.discoveryEvents.onFoundService({
-					name: service.getName(),
-					type: service.getType(),
-					host: service.getAddress(),
-					port: service.getPort(),
-				});
+                    name: service.getName(),
+                    type: service.getType(),
+                    host: service.getAddress(),
+                    port: service.getPort(),
+                });
             },
 
             onLostService(service: any) {
                 debug("onLostService", service);
                 owner.discoveryEvents.onLostService({
-					name: service.getName(),
-					type: service.getType(),
-					host: service.getAddress(), // Probably missing.
-					port: service.getPort(),    // Probably missing.
-				});
+                    name: service.getName(),
+                    type: service.getType(),
+                    host: service.getAddress(), // Probably missing.
+					          port: service.getPort(),    // Probably missing.
+				        });
             },
 
             onConnectionInfo(connected: any) {
@@ -250,16 +260,21 @@ export class Conservify extends Common {
 
         this.networking = new org.conservify.networking.Networking(androidApp.context, this.networkingListener, this.uploadListener, this.downloadListener);
 
-        this.networking.getServiceDiscovery().start(serviceType);
+        return new Promise((resolve, reject) => {
+            this.started = {
+                resolve,
+                reject
+            };
 
-        debug("ready");
+            this.networking.getServiceDiscovery().start(serviceType);
 
-        return Promise.resolve({ });
+            debug("starting...");
+        });
     }
 
     public json(info) {
         const transfer = new org.conservify.networking.WebTransfer();
-		transfer.setMethod(info.method);
+        transfer.setMethod(info.method);
         transfer.setUrl(info.url);
 
         for (let [key, value] of Object.entries(info.headers || { })) {
@@ -280,7 +295,7 @@ export class Conservify extends Common {
 
     public protobuf(info) {
         const transfer = new org.conservify.networking.WebTransfer();
-		transfer.setMethod(info.method);
+        transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setBase64EncodeResponseBody(true);
 
@@ -308,7 +323,7 @@ export class Conservify extends Common {
 
     public download(info) {
         const transfer = new org.conservify.networking.WebTransfer();
-		transfer.setMethod(info.method);
+        transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
@@ -330,7 +345,7 @@ export class Conservify extends Common {
 
     public upload(info) {
         const transfer = new org.conservify.networking.WebTransfer();
-		transfer.setMethod(info.method);
+        transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
