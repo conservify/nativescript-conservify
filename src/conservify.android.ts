@@ -39,9 +39,8 @@ export class Conservify extends Common {
     constructor(discoveryEvents) {
         super();
         this.active = {};
-        this.scan = null;
+        this.networkStatus = null;
         this.started = null;
-        this.connected = null;
         this.discoveryEvents = discoveryEvents;
     }
 
@@ -80,53 +79,52 @@ export class Conservify extends Common {
 				});
 			},
 
-			onConnectionInfo(connected: any) {
-                debug("onConnectionInfo", connected);
-            },
+			onNetworkStatus(status: any) {
+                debug("onNetworkStatus");
 
-            onConnectedNetwork(network: any) {
-                debug("onConnectedNetwork", network.getSsid());
-
-                if (owner.connected) {
-                    owner.connected.resolve(network);
-                    owner.connected = null;
-                }
-            },
-
-            onNetworksFound(networks: any) {
-                if (owner.scan) {
-                    debug("onNetworksFound", networks, networks.getNetworks());
-
-                    const found: { ssid: string }[] = [];
-					const networksArray = networks.getNetworks();
-
-					if (networksArray != null) {
-						for (let i = 0; i < networksArray.size(); ++i) {
-							const n = networksArray[i];
-							found.push({
-								ssid: n.getSsid()
-							});
+				if (owner.networkStatus) {
+					function getConnectedWifi() {
+						if (status.getConnectedWifi() == null || status.getConnectedWifi().getSsid() == null) {
+							return null;
 						}
+
+						return {
+							ssid: status.getConnectedWifi().getSsid().replace('"', '')
+						};
 					}
 
-                    owner.scan.resolve(found);
-                    owner.scan = null;
-                }
-                else {
-                    console.error("onNetworksFound no promise");
-                }
-            },
+					function getWifiNetworks() {
+						if (status.getWifiNetworks() == null) {
+							return null;
+						}
 
-            onNetworkScanError() {
-                if (owner.scan) {
-                    debug("onNetworkScanError");
+						const found: { ssid: string }[] = [];
+						const networksArray = status.getWifiNetworks().getNetworks();
 
-                    owner.scan.reject();
-                    owner.scan = null;
-                }
-                else {
-                    console.error("onNetworkScanError no promise");
-                }
+						if (networksArray != null) {
+							for (let i = 0; i < networksArray.size(); ++i) {
+								const n = networksArray[i];
+								found.push({
+									ssid: n.getSsid()
+								});
+							}
+						}
+
+						return found;
+					}
+
+					const jsObject = {
+						connected: status.getConnected(),
+						connectedWifi: getConnectedWifi(),
+						wifiNetworks: getWifiNetworks()
+					};
+
+                    owner.networkStatus.resolve(jsObject);
+                    owner.networkStatus = null;
+				}
+				else {
+					debug("onNetworkStatus: no promise!");
+				}
             },
         });
 
@@ -371,7 +369,7 @@ export class Conservify extends Common {
 
     public findConnectedNetwork() {
         return new Promise((resolve, reject) => {
-            this.connected = {
+            this.networkStatus = {
                 resolve,
                 reject
             };
@@ -382,7 +380,7 @@ export class Conservify extends Common {
 
     public scanNetworks() {
         return new Promise((resolve, reject) => {
-            this.scan = {
+            this.networkStatus = {
                 resolve,
                 reject
             };

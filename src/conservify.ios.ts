@@ -5,10 +5,7 @@ interface NetworkingListener {
     ondiscoveryfailed(): void
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
-    onConnectionInfoWithConnected(connected: boolean): void;
-    onConnectedNetworkWithNetwork(network: WifiNetwork): void;
-    onNetworksFoundWithNetworks(networks: WifiNetworks): void;
-    onNetworkScanError(): void;
+    onNetworkStatusWithStatus(status: NetworkingStatus): void;
 }
 
 declare var NetworkingListener: {
@@ -31,6 +28,13 @@ declare class WifiNetwork extends NSObject {
 
 declare class WifiNetworks extends NSObject {
     networks: WifiNetwork[];
+}
+
+declare class NetworkingStatus extends NSObject {
+	connected: bool;
+	connectedWifi: WifiNetwork;
+	wifiNetworks: WifiNetworks;
+	scanError: bool;
 }
 
 declare class WebTransfer extends NSObject {
@@ -69,15 +73,15 @@ declare class WifiNetworksManager extends NSObject {
 }
 
 declare class Networking extends NSObject {
-	  static alloc(): Networking; // inherited from NSObject
+	static alloc(): Networking; // inherited from NSObject
 
-	  static new(): Networking; // inherited from NSObject
+	static new(): Networking; // inherited from NSObject
 
-    initWithNetworkingListenerUploadListenerDownloadListener(networkingListener: NetworkingListener, uploadListener: WebTransferListener, downloadListener: WebTransferListener): Networking;
+	initWithNetworkingListenerUploadListenerDownloadListener(networkingListener: NetworkingListener, uploadListener: WebTransferListener, downloadListener: WebTransferListener): Networking;
 
-    serviceDiscovery: ServiceDiscovery;
-    web: Web;
-    wifi: WifiNetworksManager;
+	serviceDiscovery: ServiceDiscovery;
+	web: Web;
+	wifi: WifiNetworksManager;
 }
 
 const NetworkingProto = global.Networking;
@@ -94,8 +98,7 @@ const debug = console.log;
 
 interface OtherPromises {
     getStartedPromise(): Promise;
-    getConnectedNetworkPromise(): Promise;
-    getScanPromise(): Promise;
+    getNetworkStatusPromise(): Promise;
     getDiscoveryEvents(): any;
 }
 
@@ -125,47 +128,31 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
         this.promises.getStartedPromise().reject();
     }
 
-    public onFoundServiceWithService(service: ServiceInfo) {
-        debug("onFoundServiceWithService", service.type, service.name, service.host, service.port);
-        this.promises.getDiscoveryEvents().onFoundService({
-					  name: service.name,
-					  type: service.type,
-					  host: service.host,
-					  port: service.port,
-				});
-    }
+	public onFoundServiceWithService(service: ServiceInfo) {
+		debug("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+		this.promises.getDiscoveryEvents().onFoundService({
+			name: service.name,
+			type: service.type,
+			host: service.host,
+			port: service.port,
+		});
+	}
 
-    public onLostServiceWithService(service: ServiceInfo) {
-        debug("onLostServiceWithService", service.type, service.name);
-        this.promises.getDiscoveryEvents().onLostService({
-					  name: service.name,
-					  type: service.type,
-					  host: service.host, // Probably missing.
-					  port: service.port,    // Probably missing.
-				});
-    }
+	public onLostServiceWithService(service: ServiceInfo) {
+		debug("onLostServiceWithService", service.type, service.name);
+		this.promises.getDiscoveryEvents().onLostService({
+			name: service.name,
+			type: service.type,
+			host: service.host, // Probably missing.
+			port: service.port, // Probably missing.
+		});
+	}
 
-    public onConnectionInfoWithConnected(connected: boolean) {
-        debug("onConnectionInfoWithConnected", connected);
-    }
+	public onNetworkStatusWithStatus(status: NetworkingStatus) {
+		debug("onNetworkStatusWithStatus", status);
 
-    public onConnectedNetworkWithNetwork(network: WifiNetwork) {
-        debug("onConnectedNetworkWithNetwork", network);
-
-        this.promises.getConnectedNetworkPromise().resolve(network);
-    }
-
-    public onNetworksFoundWithNetworks(networks: WifiNetworks) {
-        debug("onNetworksFoundWithNetworks", networks);
-
-        this.promises.getScanPromise().resolve(networks);
-    }
-
-    public onNetworkScanError() {
-        debug("onNetworkScanError");
-
-        this.promises.getScanPromise().reject();
-    }
+        this.promises.getNetworkStatusPromise().resolve(status);
+	}
 }
 
 interface ActiveTasks {
@@ -313,7 +300,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
     active: { [key: string]: any; };
-    scan: any;
+    networkStatus: any;
     started: any;
 
     networking: Networking;
@@ -455,21 +442,17 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         return this.discoveryEvents;
     }
 
-    public getConnectedNetworkPromise(): Promise {
-        return this.connected;
-    }
-
     public getStartedPromise(): Promise {
         return this.started;
     }
 
-    public getScanPromise(): Promise {
-        return this.scan;
+    public getNetworkStatusPromise(): Promise {
+        return this.networkStatus;
     }
 
     public findConnectedNetwork() {
         return new Promise((resolve, reject) => {
-            this.connected = {
+            this.networkStatus = {
                 resolve,
                 reject
             };
@@ -480,7 +463,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     public scanNetworks() {
         return new Promise((resolve, reject) => {
-            this.scan = {
+            this.networkStatus = {
                 resolve,
                 reject
             };
