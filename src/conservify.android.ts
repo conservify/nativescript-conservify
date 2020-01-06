@@ -89,7 +89,7 @@ export class Conservify extends Common {
 						}
 
 						return {
-							ssid: status.getConnectedWifi().getSsid().replace('"', '')
+							ssid: status.getConnectedWifi().getSsid().replace(/"/g, '')
 						};
 					}
 
