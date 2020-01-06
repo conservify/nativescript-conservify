@@ -5,7 +5,7 @@ import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
 const debug = (() => {
-    if (false) {
+    if (true) {
         return console.log;
     }
     return () => { };
@@ -75,12 +75,12 @@ export class Conservify extends Common {
                 owner.discoveryEvents.onLostService({
                     name: service.getName(),
                     type: service.getType(),
-                    host: service.getAddress(), // Probably missing.
-					          port: service.getPort(),    // Probably missing.
-				        });
-            },
+					host: service.getAddress(), // Probably missing.
+					port: service.getPort(),    // Probably missing.
+				});
+			},
 
-            onConnectionInfo(connected: any) {
+			onConnectionInfo(connected: any) {
                 debug("onConnectionInfo", connected);
             },
 
@@ -98,12 +98,16 @@ export class Conservify extends Common {
                     debug("onNetworksFound", networks, networks.getNetworks());
 
                     const found: { ssid: string }[] = [];
-                    for (let i = 0; i < networks.getNetworks().size(); ++i) {
-                        const n = networks.getNetworks()[i];
-                        found.push({
-                            ssid: n.getSsid()
-                        });
-                    }
+					const networksArray = networks.getNetworks();
+
+					if (networksArray != null) {
+						for (let i = 0; i < networksArray.size(); ++i) {
+							const n = networksArray[i];
+							found.push({
+								ssid: n.getSsid()
+							});
+						}
+					}
 
                     owner.scan.resolve(found);
                     owner.scan = null;
