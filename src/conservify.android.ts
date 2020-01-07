@@ -143,7 +143,7 @@ export class Conservify extends Common {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
 				const jsHeaders = toJsHeaders(headers);
 
-                debug("upload:onComplete", taskId, jsHeaders, contentType, body, statusCode);
+                debug("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
                 const { info, transfer } = task;
@@ -203,7 +203,7 @@ export class Conservify extends Common {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
 				const jsHeaders = toJsHeaders(headers);
 
-                debug("download:onComplete", taskId, jsHeaders, contentType, body, statusCode);
+                debug("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
                 const { info, transfer } = task;

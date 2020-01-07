@@ -195,7 +195,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
         const jsHeaders = toJsHeaders(headers);
 
-        debug("upload:onComplete", taskId, jsHeaders, contentType, body, statusCode);
+        debug("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
