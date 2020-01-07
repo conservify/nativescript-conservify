@@ -278,6 +278,27 @@ export class Conservify extends Common {
         });
     }
 
+    public text(info) {
+        const transfer = new org.conservify.networking.WebTransfer();
+        transfer.setMethod(info.method);
+        transfer.setUrl(info.url);
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.header(key, (value as string));
+        }
+
+        return new Promise((resolve, reject) => {
+            this.active[transfer.getId()] = {
+                info,
+                transfer,
+                resolve,
+                reject,
+            };
+
+            this.networking.getWeb().binary(transfer);
+        });
+    }
+
     public json(info) {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);

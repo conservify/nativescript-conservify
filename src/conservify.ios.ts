@@ -379,6 +379,32 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         });
     }
 
+    public text(info) {
+        const transfer = WebTransfer.alloc().init();
+        transfer.method = info.method;
+        transfer.url = info.url;
+
+        for (let [key, value] of Object.entries(info.headers || { })) {
+            transfer.headerWithKeyValue(key, (value as string));
+        }
+
+        if (info.body) {
+            const requestBody = Buffer.from(info.body).toString("base64");
+            transfer.body = requestBody;
+        }
+
+        return new Promise((resolve, reject) => {
+            this.active[transfer.id] = {
+                info,
+                transfer,
+                resolve,
+                reject,
+            };
+
+            this.networking.web.simpleWithInfo(transfer);
+        });
+    }
+
     public protobuf(info) {
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
