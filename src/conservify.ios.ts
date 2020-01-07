@@ -160,6 +160,15 @@ interface ActiveTasks {
     removeTask(id: string): void;
 }
 
+function toJsHeaders(headers) {
+    const jsHeaders = {};
+    for (let i = 0; i < headers.allKeys.count; ++i) {
+       const key = headers.allKeys[i];
+       jsHeaders[key] = headers.valueForKey(key);
+    }
+    return jsHeaders;
+}
+
 class UploadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
@@ -184,7 +193,9 @@ class UploadListener extends NSObject implements WebTransferListener {
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        debug("upload:onComplete", taskId, headers, contentType, body, statusCode);
+        const jsHeaders = toJsHeaders(headers);
+
+        debug("upload:onComplete", taskId, jsHeaders, contentType, body, statusCode);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
@@ -208,7 +219,7 @@ class UploadListener extends NSObject implements WebTransferListener {
 
         task.resolve({
             info,
-            headers,
+            headers: jsHeaders,
             statusCode,
             body: getBody(),
         });
@@ -253,7 +264,9 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-        debug("download:onComplete", taskId, headers, contentType, statusCode);
+        const jsHeaders = toJsHeaders(headers);
+
+        debug("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
         const { info, transfer } = task;
@@ -277,7 +290,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
         task.resolve({
             info,
-            headers,
+            headers: jsHeaders,
             statusCode,
             body: getBody(),
         });
