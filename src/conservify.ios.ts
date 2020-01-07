@@ -164,7 +164,7 @@ function toJsHeaders(headers) {
     const jsHeaders = {};
     for (let i = 0; i < headers.allKeys.count; ++i) {
        const key = headers.allKeys[i];
-       jsHeaders[key] = headers.valueForKey(key);
+       jsHeaders[key.toLowerCase()] = headers.valueForKey(key);
     }
     return jsHeaders;
 }
