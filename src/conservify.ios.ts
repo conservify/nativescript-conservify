@@ -383,6 +383,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
+		transfer.body = info.body;
 
         for (let [key, value] of Object.entries(info.headers || { })) {
             transfer.headerWithKeyValue(key, (value as string));
