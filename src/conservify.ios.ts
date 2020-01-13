@@ -149,7 +149,7 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 	}
 
 	public onNetworkStatusWithStatus(status: NetworkingStatus) {
-		debug("onNetworkStatusWithStatus", status);
+		// debug("onNetworkStatusWithStatus", status);
 
         this.promises.getNetworkStatusPromise().resolve(status);
 	}

@@ -80,7 +80,7 @@ export class Conservify extends Common {
 			},
 
 			onNetworkStatus(status: any) {
-                debug("onNetworkStatus");
+                // debug("onNetworkStatus");
 
 				if (owner.networkStatus) {
 					function getConnectedWifi() {
