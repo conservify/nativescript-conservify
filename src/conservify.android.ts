@@ -60,7 +60,7 @@ export class Conservify extends Common {
             }
 
             onFoundService(service: any) {
-                debug("onFoundService", service);
+                debug("onFoundService", service.getName(), service.getType(), service.getAddress(), service.getPort());
                 owner.discoveryEvents.onFoundService({
                     name: service.getName(),
                     type: service.getType(),
@@ -70,7 +70,7 @@ export class Conservify extends Common {
             },
 
             onLostService(service: any) {
-                debug("onLostService", service);
+                debug("onLostService", service.getName(), service.getType());
                 owner.discoveryEvents.onLostService({
                     name: service.getName(),
                     type: service.getType(),
