@@ -2,7 +2,7 @@ import { Common } from './conservify.common';
 
 interface NetworkingListener {
     onStarted(): void
-    ondiscoveryfailed(): void
+    onDiscoveryFailed(): void
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
     onNetworkStatusWithStatus(status: NetworkingStatus): void;
@@ -31,10 +31,10 @@ declare class WifiNetworks extends NSObject {
 }
 
 declare class NetworkingStatus extends NSObject {
-	connected: bool;
+	connected: boolean;
 	connectedWifi: WifiNetwork;
 	wifiNetworks: WifiNetworks;
-	scanError: bool;
+	scanError: boolean;
 }
 
 declare class WebTransfer extends NSObject {
@@ -94,8 +94,6 @@ const WebTransferProto = global.WebTransfer;
 const WifiNetworkProto = global.WifiNetwork;
 const WifiManagerProto = global.WifiManager;
 
-const debug = console.log;
-
 interface OtherPromises {
     getStartedPromise(): Promise;
     getNetworkStatusPromise(): Promise;
@@ -106,30 +104,31 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     public static ObjCProtocols = [NetworkingListener];
 
     promises: OtherPromises;
+	logger: any;
 
-	  static alloc(): MyNetworkingListener {
-        return <MyNetworkingListener>super.new();
-    }
+	static alloc(): MyNetworkingListener {
+		return <MyNetworkingListener>super.new();
+	}
 
-    public initWithPromises(promises: OtherPromises): MyNetworkingListener {
+	public initWithPromises(promises: OtherPromises, logger: any): MyNetworkingListener {
         this.promises = promises;
+		this.logger = logger;
         return <MyNetworkingListener>this;
     }
 
     public onStarted() {
-        debug("onStarted");
+        this.logger("onStarted");
 
         this.promises.getStartedPromise().resolve();
     }
 
     public onDiscoveryFailed() {
-        debug("onDiscoveryFailed");
-
         this.promises.getStartedPromise().reject();
     }
 
 	public onFoundServiceWithService(service: ServiceInfo) {
-		debug("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+		this.logger("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+
 		this.promises.getDiscoveryEvents().onFoundService({
 			name: service.name,
 			type: service.type,
@@ -139,7 +138,8 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 	}
 
 	public onLostServiceWithService(service: ServiceInfo) {
-		debug("onLostServiceWithService", service.type, service.name);
+		this.logger("onLostServiceWithService", service.type, service.name);
+
 		this.promises.getDiscoveryEvents().onLostService({
 			name: service.name,
 			type: service.type,
@@ -149,8 +149,6 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 	}
 
 	public onNetworkStatusWithStatus(status: NetworkingStatus) {
-		// debug("onNetworkStatusWithStatus", status);
-
         this.promises.getNetworkStatusPromise().resolve(status);
 	}
 }
@@ -172,17 +170,20 @@ function toJsHeaders(headers) {
 class UploadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
-	  static alloc(): UploadListener {
-        return <UploadListener>super.new();
-    }
+	logger: any;
 
-    public initWithTasks(tasks: ActiveTasks): UploadListener {
+	static alloc(): UploadListener {
+		return <UploadListener>super.new();
+	}
+
+    public initWithTasks(tasks: ActiveTasks, logger: any): UploadListener {
         this.tasks = tasks;
+		this.logger = logger;
         return <UploadListener>this;
     }
 
     public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
-        debug("upload:onProgress", taskId, bytes, total);
+        this.logger("upload:onProgress", taskId, bytes, total);
 
         const { info } = this.tasks.getTask(taskId);
         const { progress } = info;
@@ -195,7 +196,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
         const jsHeaders = toJsHeaders(headers);
 
-        debug("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
@@ -226,7 +227,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     }
 
     public onErrorWithTaskIdMessage(taskId: string, message: string) {
-        debug("upload:onError", taskId);
+        this.logger("upload:onError", taskId);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
@@ -243,17 +244,19 @@ class UploadListener extends NSObject implements WebTransferListener {
 class DownloadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
-	  static alloc(): DownloadListener {
-        return <DownloadListener>super.new();
-    }
+	logger: any;
 
-    public initWithTasks(tasks: ActiveTasks): DownloadListener {
+	static alloc(): DownloadListener {
+		return <DownloadListener>super.new();
+	}
+
+	public initWithTasks(tasks: ActiveTasks, logger: any): DownloadListener {
         this.tasks = tasks;
         return <DownloadListener>this;
     }
 
     public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
-        debug("download:onProgress", taskId, bytes, total);
+        this.logger("download:onProgress", taskId, bytes, total);
 
         const { info } = this.tasks.getTask(taskId);
         const { progress } = info;
@@ -266,7 +269,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
         const jsHeaders = toJsHeaders(headers);
 
-        debug("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
         const { info, transfer } = task;
@@ -297,7 +300,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 
     public onErrorWithTaskIdMessage(taskId: string, message: string) {
-        debug("download:onError", taskId, message);
+        this.logger("download:onError", taskId, message);
 
         const task = this.tasks.getTask(taskId);
         const { info } = task;
@@ -312,6 +315,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 }
 
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
+	logger: any;
     active: { [key: string]: any; };
     networkStatus: any;
     started: any;
@@ -322,8 +326,9 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     downloadListener: WebTransferListener;
     discoveryEvents: any;
 
-    constructor(discoveryEvents) {
+    constructor(discoveryEvents, logger) {
         super();
+		this.logger = logger || console.log;
         this.active = {};
         this.scan = null;
         this.started = null;
@@ -339,13 +344,13 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public start(serviceType: string) {
-        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this);
-        this.uploadListener = UploadListener.alloc().initWithTasks(this);
-        this.downloadListener = DownloadListener.alloc().initWithTasks(this);
+        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
+        this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
+        this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
 
         return new Promise((resolve, reject) => {
-            debug("initialize, ok");
+            this.logger("initialize, ok");
 
             this.started = {
                 resolve,
@@ -354,7 +359,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
             this.networking.serviceDiscovery.startWithServiceType(serviceType);
 
-            debug("starting...");
+            this.logger("starting...");
         });
     }
 

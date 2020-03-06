@@ -4,13 +4,6 @@ import * as applicationModule from 'tns-core-modules/application';
 import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
-const debug = (() => {
-    if (true) {
-        return console.log;
-    }
-    return () => { };
-})();
-
 function toJsHeaders(headers) {
 	const jsHeaders = {};
 	const iter = headers.entrySet().iterator();
@@ -23,6 +16,7 @@ function toJsHeaders(headers) {
 }
 
 export class Conservify extends Common {
+	logger: any;
     discoveryEvents: any;
     active: { [key: string]: any; };
     scan: any;
@@ -36,8 +30,9 @@ export class Conservify extends Common {
     dataListener: org.conservify.data.DataListener;
     fileSystem: org.conservify.data.FileSystem;
 
-    constructor(discoveryEvents) {
+    constructor(discoveryEvents, logger) {
         super();
+		this.logger = logger || console.log;
         this.active = {};
         this.networkStatus = null;
         this.started = null;
@@ -45,7 +40,7 @@ export class Conservify extends Common {
     }
 
     public start(serviceType: string) {
-        debug("initialize");
+        this.logger("initialize");
 
         const owner = this;
         const active = this.active;
@@ -53,14 +48,14 @@ export class Conservify extends Common {
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted() {
                 owner.started.resolve();
-            }
+            },
 
             onDiscoveryFailed() {
                 owner.started.reject();
-            }
+            },
 
             onFoundService(service: any) {
-                debug("onFoundService", service.getName(), service.getType(), service.getAddress(), service.getPort());
+                owner.logger("onFoundService", service.getName(), service.getType(), service.getAddress(), service.getPort());
                 owner.discoveryEvents.onFoundService({
                     name: service.getName(),
                     type: service.getType(),
@@ -70,7 +65,7 @@ export class Conservify extends Common {
             },
 
             onLostService(service: any) {
-                debug("onLostService", service.getName(), service.getType());
+                owner.logger("onLostService", service.getName(), service.getType());
                 owner.discoveryEvents.onLostService({
                     name: service.getName(),
                     type: service.getType(),
@@ -80,7 +75,7 @@ export class Conservify extends Common {
 			},
 
 			onNetworkStatus(status: any) {
-                // debug("onNetworkStatus");
+                // owner.logger("onNetworkStatus");
 
 				if (owner.networkStatus) {
 					function getConnectedWifi() {
@@ -123,14 +118,14 @@ export class Conservify extends Common {
                     owner.networkStatus = null;
 				}
 				else {
-					debug("onNetworkStatus: no promise!");
+					owner.logger("onNetworkStatus: no promise!");
 				}
             },
         });
 
         this.uploadListener = new org.conservify.networking.WebTransferListener({
             onProgress(taskId: string, headers: any, bytes: number, total: number) {
-                debug("upload:onProgress", taskId, bytes, total);
+                owner.logger("upload:onProgress", taskId, bytes, total);
 
                 const { info } = active[taskId];
                 const { progress } = info;
@@ -143,7 +138,7 @@ export class Conservify extends Common {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
 				const jsHeaders = toJsHeaders(headers);
 
-                debug("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
                 const { info, transfer } = task;
@@ -174,7 +169,7 @@ export class Conservify extends Common {
             },
 
             onError(taskId: string, message: string) {
-                debug("upload:onError", taskId, message);
+                owner.logger("upload:onError", taskId, message);
 
                 const task = active[taskId];
                 const { info } = task;
@@ -190,7 +185,7 @@ export class Conservify extends Common {
 
         this.downloadListener = new org.conservify.networking.WebTransferListener({
             onProgress(taskId: string, headers: any, bytes: number, total: number) {
-                debug("download:onProgress", taskId, bytes, total);
+                owner.logger("download:onProgress", taskId, bytes, total);
 
                 const { info } = active[taskId];
                 const { progress } = info;
@@ -203,7 +198,7 @@ export class Conservify extends Common {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
 				const jsHeaders = toJsHeaders(headers);
 
-                debug("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
                 const { info, transfer } = task;
@@ -234,7 +229,7 @@ export class Conservify extends Common {
             },
 
             onError(taskId: string, message: string) {
-                debug("download:onError", taskId, message);
+                owner.logger("download:onError", taskId, message);
 
                 const task = active[taskId];
                 const { info } = task;
@@ -250,15 +245,15 @@ export class Conservify extends Common {
 
         this.dataListener = new org.conservify.data.DataListener({
             onFileInfo(path: string, info: any) {
-                debug("fs:onFileInfo", path, info);
+                owner.logger("fs:onFileInfo", path, info);
             },
 
             onFileRecords(path: string, records: any) {
-                debug("fs:onFileRecords", path, records);
+                owner.logger("fs:onFileRecords", path, records);
             },
 
             onFileAnalysis(path: string, analysis: any) {
-                debug("fs:onFileAnalysis", path, analysis);
+                owner.logger("fs:onFileAnalysis", path, analysis);
             },
         });
 
@@ -274,7 +269,7 @@ export class Conservify extends Common {
 
             this.networking.getServiceDiscovery().start(serviceType);
 
-            debug("starting...");
+            owner.logger("starting...");
         });
     }
 
