@@ -22,6 +22,7 @@ export class Conservify extends Common {
     scan: any;
     started: any;
     connected: any;
+	networkStatus: any;
 
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;

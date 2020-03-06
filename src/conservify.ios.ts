@@ -42,10 +42,13 @@ declare class WebTransfer extends NSObject {
 
 	static new(): WebTransfer;
 
+	public id: string;
     public method: string;
     public url: string;
     public path: string;
     public body: any;
+	public base64EncodeResponseBody: boolean;
+	public base64DecodeRequestBody: boolean;
 
     public headerWithKeyValue(key: string, value: string): WebTransfer;
 }
@@ -199,7 +202,7 @@ class UploadListener extends NSObject implements WebTransferListener {
         this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
-        const { info } = task;
+        const { info, transfer } = task;
 
         this.tasks.removeTask(taskId);
 
