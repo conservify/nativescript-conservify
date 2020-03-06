@@ -255,6 +255,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
 	public initWithTasks(tasks: ActiveTasks, logger: any): DownloadListener {
         this.tasks = tasks;
+		this.logger = logger;
         return <DownloadListener>this;
     }
 
