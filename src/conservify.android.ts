@@ -305,6 +305,7 @@ export class Conservify extends Common {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
+        transfer.setBody(info.body);
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);

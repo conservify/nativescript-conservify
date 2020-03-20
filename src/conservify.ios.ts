@@ -400,6 +400,10 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
             transfer.headerWithKeyValue(key, value as string);
         }
 
+        if (info.body) {
+            transfer.body = info.body;
+        }
+
         return new Promise((resolve, reject) => {
             this.active[transfer.id] = {
                 info,
@@ -423,8 +427,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         }
 
         if (info.body) {
-            const requestBody = Buffer.from(info.body).toString("base64");
-            transfer.body = requestBody;
+            transfer.body = info.body;
         }
 
         return new Promise((resolve, reject) => {
