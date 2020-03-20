@@ -1,26 +1,32 @@
-import { Common } from './conservify.common';
+import { Common } from "./conservify.common";
 
 interface NetworkingListener {
-    onStarted(): void
-    onDiscoveryFailed(): void
+    onStarted(): void;
+    onDiscoveryFailed(): void;
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
     onNetworkStatusWithStatus(status: NetworkingStatus): void;
 }
 
 declare var NetworkingListener: {
-	  prototype: NetworkingListener;
-}
+    prototype: NetworkingListener;
+};
 
 interface WebTransferListener {
     onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number): void;
-    onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number): void;
+    onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(
+        taskId: string,
+        headers: any,
+        contentType: string,
+        body: any,
+        statusCode: number
+    ): void;
     onErrorWithTaskIdMessage(taskId: string, message: string): void;
 }
 
 declare var WebTransferListener: {
-	  prototype: WebTransferListener;
-}
+    prototype: WebTransferListener;
+};
 
 declare class WifiNetwork extends NSObject {
     public ssid: string;
@@ -31,24 +37,24 @@ declare class WifiNetworks extends NSObject {
 }
 
 declare class NetworkingStatus extends NSObject {
-	connected: boolean;
-	connectedWifi: WifiNetwork;
-	wifiNetworks: WifiNetworks;
-	scanError: boolean;
+    connected: boolean;
+    connectedWifi: WifiNetwork;
+    wifiNetworks: WifiNetworks;
+    scanError: boolean;
 }
 
 declare class WebTransfer extends NSObject {
-	static alloc(): WebTransfer;
+    static alloc(): WebTransfer;
 
-	static new(): WebTransfer;
+    static new(): WebTransfer;
 
-	public id: string;
+    public id: string;
     public method: string;
     public url: string;
     public path: string;
     public body: any;
-	public base64EncodeResponseBody: boolean;
-	public base64DecodeRequestBody: boolean;
+    public base64EncodeResponseBody: boolean;
+    public base64DecodeRequestBody: boolean;
 
     public headerWithKeyValue(key: string, value: string): WebTransfer;
 }
@@ -61,7 +67,7 @@ declare class ServiceInfo extends NSObject {
 }
 
 declare class ServiceDiscovery extends NSObject {
-    startWithServiceType(serviceType: string): void
+    startWithServiceType(serviceType: string): void;
 }
 
 declare class Web extends NSObject {
@@ -76,15 +82,19 @@ declare class WifiNetworksManager extends NSObject {
 }
 
 declare class Networking extends NSObject {
-	static alloc(): Networking; // inherited from NSObject
+    static alloc(): Networking; // inherited from NSObject
 
-	static new(): Networking; // inherited from NSObject
+    static new(): Networking; // inherited from NSObject
 
-	initWithNetworkingListenerUploadListenerDownloadListener(networkingListener: NetworkingListener, uploadListener: WebTransferListener, downloadListener: WebTransferListener): Networking;
+    initWithNetworkingListenerUploadListenerDownloadListener(
+        networkingListener: NetworkingListener,
+        uploadListener: WebTransferListener,
+        downloadListener: WebTransferListener
+    ): Networking;
 
-	serviceDiscovery: ServiceDiscovery;
-	web: Web;
-	wifi: WifiNetworksManager;
+    serviceDiscovery: ServiceDiscovery;
+    web: Web;
+    wifi: WifiNetworksManager;
 }
 
 const NetworkingProto = global.Networking;
@@ -107,15 +117,15 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     public static ObjCProtocols = [NetworkingListener];
 
     promises: OtherPromises;
-	logger: any;
+    logger: any;
 
-	static alloc(): MyNetworkingListener {
-		return <MyNetworkingListener>super.new();
-	}
+    static alloc(): MyNetworkingListener {
+        return <MyNetworkingListener>super.new();
+    }
 
-	public initWithPromises(promises: OtherPromises, logger: any): MyNetworkingListener {
+    public initWithPromises(promises: OtherPromises, logger: any): MyNetworkingListener {
         this.promises = promises;
-		this.logger = logger;
+        this.logger = logger;
         return <MyNetworkingListener>this;
     }
 
@@ -129,31 +139,31 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
         this.promises.getStartedPromise().reject();
     }
 
-	public onFoundServiceWithService(service: ServiceInfo) {
-		this.logger("onFoundServiceWithService", service.type, service.name, service.host, service.port);
+    public onFoundServiceWithService(service: ServiceInfo) {
+        this.logger("onFoundServiceWithService", service.type, service.name, service.host, service.port);
 
-		this.promises.getDiscoveryEvents().onFoundService({
-			name: service.name,
-			type: service.type,
-			host: service.host,
-			port: service.port,
-		});
-	}
+        this.promises.getDiscoveryEvents().onFoundService({
+            name: service.name,
+            type: service.type,
+            host: service.host,
+            port: service.port,
+        });
+    }
 
-	public onLostServiceWithService(service: ServiceInfo) {
-		this.logger("onLostServiceWithService", service.type, service.name);
+    public onLostServiceWithService(service: ServiceInfo) {
+        this.logger("onLostServiceWithService", service.type, service.name);
 
-		this.promises.getDiscoveryEvents().onLostService({
-			name: service.name,
-			type: service.type,
-			host: service.host, // Probably missing.
-			port: service.port, // Probably missing.
-		});
-	}
+        this.promises.getDiscoveryEvents().onLostService({
+            name: service.name,
+            type: service.type,
+            host: service.host, // Probably missing.
+            port: service.port, // Probably missing.
+        });
+    }
 
-	public onNetworkStatusWithStatus(status: NetworkingStatus) {
+    public onNetworkStatusWithStatus(status: NetworkingStatus) {
         this.promises.getNetworkStatusPromise().resolve(status);
-	}
+    }
 }
 
 interface ActiveTasks {
@@ -164,8 +174,8 @@ interface ActiveTasks {
 function toJsHeaders(headers) {
     const jsHeaders = {};
     for (let i = 0; i < headers.allKeys.count; ++i) {
-       const key = headers.allKeys[i];
-       jsHeaders[key.toLowerCase()] = headers.valueForKey(key);
+        const key = headers.allKeys[i];
+        jsHeaders[key.toLowerCase()] = headers.valueForKey(key);
     }
     return jsHeaders;
 }
@@ -173,15 +183,15 @@ function toJsHeaders(headers) {
 class UploadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
-	logger: any;
+    logger: any;
 
-	static alloc(): UploadListener {
-		return <UploadListener>super.new();
-	}
+    static alloc(): UploadListener {
+        return <UploadListener>super.new();
+    }
 
     public initWithTasks(tasks: ActiveTasks, logger: any): UploadListener {
         this.tasks = tasks;
-		this.logger = logger;
+        this.logger = logger;
         return <UploadListener>this;
     }
 
@@ -196,7 +206,13 @@ class UploadListener extends NSObject implements WebTransferListener {
         }
     }
 
-    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(
+        taskId: string,
+        headers: any,
+        contentType: string,
+        body: any,
+        statusCode: number
+    ) {
         const jsHeaders = toJsHeaders(headers);
 
         this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
@@ -210,8 +226,7 @@ class UploadListener extends NSObject implements WebTransferListener {
             if (body) {
                 if (contentType.indexOf("application/json") >= 0) {
                     return JSON.parse(body);
-                }
-                else {
+                } else {
                     if (transfer.base64EncodeResponseBody) {
                         return Buffer.from(body, "base64");
                     }
@@ -247,15 +262,15 @@ class UploadListener extends NSObject implements WebTransferListener {
 class DownloadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
-	logger: any;
+    logger: any;
 
-	static alloc(): DownloadListener {
-		return <DownloadListener>super.new();
-	}
+    static alloc(): DownloadListener {
+        return <DownloadListener>super.new();
+    }
 
-	public initWithTasks(tasks: ActiveTasks, logger: any): DownloadListener {
+    public initWithTasks(tasks: ActiveTasks, logger: any): DownloadListener {
         this.tasks = tasks;
-		this.logger = logger;
+        this.logger = logger;
         return <DownloadListener>this;
     }
 
@@ -270,7 +285,13 @@ class DownloadListener extends NSObject implements WebTransferListener {
         }
     }
 
-    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
+    public onCompleteWithTaskIdHeadersContentTypeBodyStatusCode(
+        taskId: string,
+        headers: any,
+        contentType: string,
+        body: any,
+        statusCode: number
+    ) {
         const jsHeaders = toJsHeaders(headers);
 
         this.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
@@ -284,8 +305,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
             if (body) {
                 if (contentType.indexOf("application/json") >= 0) {
                     return JSON.parse(body);
-                }
-                else {
+                } else {
                     if (transfer.base64EncodeResponseBody) {
                         return Buffer.from(body, "base64");
                     }
@@ -319,8 +339,8 @@ class DownloadListener extends NSObject implements WebTransferListener {
 }
 
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
-	logger: any;
-    active: { [key: string]: any; };
+    logger: any;
+    active: { [key: string]: any };
     networkStatus: any;
     started: any;
 
@@ -332,7 +352,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
     constructor(discoveryEvents, logger) {
         super();
-		this.logger = logger || console.log;
+        this.logger = logger || console.log;
         this.active = {};
         this.scan = null;
         this.started = null;
@@ -351,14 +371,18 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
         this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
-        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
+        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(
+            this.networkingListener,
+            this.uploadListener,
+            this.downloadListener
+        );
 
         return new Promise((resolve, reject) => {
             this.logger("initialize, ok");
 
             this.started = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.serviceDiscovery.startWithServiceType(serviceType);
@@ -372,8 +396,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.headerWithKeyValue(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.headerWithKeyValue(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -392,10 +416,10 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
-		transfer.body = info.body;
+        transfer.body = info.body;
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.headerWithKeyValue(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.headerWithKeyValue(key, value as string);
         }
 
         if (info.body) {
@@ -421,8 +445,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         transfer.url = info.url;
         transfer.base64EncodeResponseBody = true;
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.headerWithKeyValue(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.headerWithKeyValue(key, value as string);
         }
 
         if (info.body) {
@@ -449,8 +473,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         transfer.url = info.url;
         transfer.path = info.path;
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.headerWithKeyValue(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.headerWithKeyValue(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -471,8 +495,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         transfer.url = info.url;
         transfer.path = info.path;
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.headerWithKeyValue(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.headerWithKeyValue(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -503,7 +527,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.wifi.findConnectedNetwork();
@@ -514,7 +538,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.wifi.scan();

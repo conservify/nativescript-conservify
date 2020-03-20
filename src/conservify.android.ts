@@ -1,28 +1,28 @@
-import { Common } from './conservify.common';
+import { Common } from "./conservify.common";
 
-import * as applicationModule from 'tns-core-modules/application';
+import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
 import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
 function toJsHeaders(headers) {
-	const jsHeaders = {};
-	const iter = headers.entrySet().iterator();
-	while (iter.hasNext()) {
-		const entry = iter.next();
-		const key = entry.getKey();
-		jsHeaders[key.toLowerCase()] = entry.getValue();
-	}
-	return jsHeaders;
+    const jsHeaders = {};
+    const iter = headers.entrySet().iterator();
+    while (iter.hasNext()) {
+        const entry = iter.next();
+        const key = entry.getKey();
+        jsHeaders[key.toLowerCase()] = entry.getValue();
+    }
+    return jsHeaders;
 }
 
 export class Conservify extends Common {
-	logger: any;
+    logger: any;
     discoveryEvents: any;
-    active: { [key: string]: any; };
+    active: { [key: string]: any };
     scan: any;
     started: any;
     connected: any;
-	networkStatus: any;
+    networkStatus: any;
 
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;
@@ -33,7 +33,7 @@ export class Conservify extends Common {
 
     constructor(discoveryEvents, logger) {
         super();
-		this.logger = logger || console.log;
+        this.logger = logger || console.log;
         this.active = {};
         this.networkStatus = null;
         this.started = null;
@@ -70,57 +70,59 @@ export class Conservify extends Common {
                 owner.discoveryEvents.onLostService({
                     name: service.getName(),
                     type: service.getType(),
-					host: service.getAddress(), // Probably missing.
-					port: service.getPort(),    // Probably missing.
-				});
-			},
+                    host: service.getAddress(), // Probably missing.
+                    port: service.getPort(), // Probably missing.
+                });
+            },
 
-			onNetworkStatus(status: any) {
+            onNetworkStatus(status: any) {
                 // owner.logger("onNetworkStatus");
 
-				if (owner.networkStatus) {
-					function getConnectedWifi() {
-						if (status.getConnectedWifi() == null || status.getConnectedWifi().getSsid() == null) {
-							return null;
-						}
+                if (owner.networkStatus) {
+                    function getConnectedWifi() {
+                        if (status.getConnectedWifi() == null || status.getConnectedWifi().getSsid() == null) {
+                            return null;
+                        }
 
-						return {
-							ssid: status.getConnectedWifi().getSsid().replace(/"/g, '')
-						};
-					}
+                        return {
+                            ssid: status
+                                .getConnectedWifi()
+                                .getSsid()
+                                .replace(/"/g, ""),
+                        };
+                    }
 
-					function getWifiNetworks() {
-						if (status.getWifiNetworks() == null) {
-							return null;
-						}
+                    function getWifiNetworks() {
+                        if (status.getWifiNetworks() == null) {
+                            return null;
+                        }
 
-						const found: { ssid: string }[] = [];
-						const networksArray = status.getWifiNetworks().getNetworks();
+                        const found: { ssid: string }[] = [];
+                        const networksArray = status.getWifiNetworks().getNetworks();
 
-						if (networksArray != null) {
-							for (let i = 0; i < networksArray.size(); ++i) {
-								const n = networksArray[i];
-								found.push({
-									ssid: n.getSsid()
-								});
-							}
-						}
+                        if (networksArray != null) {
+                            for (let i = 0; i < networksArray.size(); ++i) {
+                                const n = networksArray[i];
+                                found.push({
+                                    ssid: n.getSsid(),
+                                });
+                            }
+                        }
 
-						return found;
-					}
+                        return found;
+                    }
 
-					const jsObject = {
-						connected: status.getConnected(),
-						connectedWifi: getConnectedWifi(),
-						wifiNetworks: getWifiNetworks()
-					};
+                    const jsObject = {
+                        connected: status.getConnected(),
+                        connectedWifi: getConnectedWifi(),
+                        wifiNetworks: getWifiNetworks(),
+                    };
 
                     owner.networkStatus.resolve(jsObject);
                     owner.networkStatus = null;
-				}
-				else {
-					owner.logger("onNetworkStatus: no promise!");
-				}
+                } else {
+                    owner.logger("onNetworkStatus: no promise!");
+                }
             },
         });
 
@@ -137,7 +139,7 @@ export class Conservify extends Common {
             },
 
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-				const jsHeaders = toJsHeaders(headers);
+                const jsHeaders = toJsHeaders(headers);
 
                 owner.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
@@ -148,8 +150,7 @@ export class Conservify extends Common {
                     if (body) {
                         if (contentType.indexOf("application/json") >= 0) {
                             return JSON.parse(body);
-                        }
-                        else {
+                        } else {
                             if (transfer.isBase64EncodeResponseBody()) {
                                 return Buffer.from(body, "base64");
                             }
@@ -179,7 +180,7 @@ export class Conservify extends Common {
 
                 task.reject({
                     info,
-					message,
+                    message,
                 });
             },
         });
@@ -197,7 +198,7 @@ export class Conservify extends Common {
             },
 
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
-				const jsHeaders = toJsHeaders(headers);
+                const jsHeaders = toJsHeaders(headers);
 
                 owner.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
@@ -208,8 +209,7 @@ export class Conservify extends Common {
                     if (body) {
                         if (contentType.indexOf("application/json") >= 0) {
                             return JSON.parse(body);
-                        }
-                        else {
+                        } else {
                             if (transfer.isBase64EncodeResponseBody()) {
                                 return Buffer.from(body, "base64");
                             }
@@ -239,7 +239,7 @@ export class Conservify extends Common {
 
                 task.reject({
                     info,
-					message,
+                    message,
                 });
             },
         });
@@ -260,12 +260,17 @@ export class Conservify extends Common {
 
         this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.dataListener);
 
-        this.networking = new org.conservify.networking.Networking(androidApp.context, this.networkingListener, this.uploadListener, this.downloadListener);
+        this.networking = new org.conservify.networking.Networking(
+            androidApp.context,
+            this.networkingListener,
+            this.uploadListener,
+            this.downloadListener
+        );
 
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.getServiceDiscovery().start(serviceType);
@@ -280,8 +285,8 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setBody(info.body);
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.header(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -301,8 +306,8 @@ export class Conservify extends Common {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.header(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -323,8 +328,8 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setBase64EncodeResponseBody(true);
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.header(key, value as string);
         }
 
         if (info.body) {
@@ -351,8 +356,8 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.header(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -373,8 +378,8 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
-        for (let [key, value] of Object.entries(info.headers || { })) {
-            transfer.header(key, (value as string));
+        for (let [key, value] of Object.entries(info.headers || {})) {
+            transfer.header(key, value as string);
         }
 
         return new Promise((resolve, reject) => {
@@ -393,7 +398,7 @@ export class Conservify extends Common {
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.getWifi().findConnectedNetwork();
@@ -404,7 +409,7 @@ export class Conservify extends Common {
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
-                reject
+                reject,
             };
 
             this.networking.getWifi().scan();
