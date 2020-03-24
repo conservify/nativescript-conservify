@@ -207,7 +207,7 @@ class UploadListener extends NSObject implements WebTransferListener {
                 progress(bytes, total, info);
             }
         } else {
-            this.logger("upload:onProgress orphaned", taskId, bytes, total);
+            this.logger("upload:onProgress (orphaned)", taskId, bytes, total);
         }
     }
 
@@ -253,14 +253,18 @@ class UploadListener extends NSObject implements WebTransferListener {
         this.logger("upload:onError", taskId);
 
         const task = this.tasks.getTask(taskId);
-        const { info } = task;
+        if (task) {
+            const { info } = task;
 
-        this.tasks.removeTask(taskId, message);
+            this.tasks.removeTask(taskId, message);
 
-        task.reject({
-            info,
-            message,
-        });
+            task.reject({
+                info,
+                message,
+            });
+        } else {
+            this.logger("upload:onError (orphaned)", taskId);
+        }
     }
 }
 
@@ -291,7 +295,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
                 progress(bytes, total);
             }
         } else {
-            this.logger("download:onProgress orphaned", taskId, bytes, total);
+            this.logger("download:onProgress (orphaned)", taskId, bytes, total);
         }
     }
 
@@ -337,14 +341,18 @@ class DownloadListener extends NSObject implements WebTransferListener {
         this.logger("download:onError", taskId, message);
 
         const task = this.tasks.getTask(taskId);
-        const { info } = task;
+        if (task) {
+            const { info } = task;
 
-        this.tasks.removeTask(taskId);
+            this.tasks.removeTask(taskId);
 
-        task.reject({
-            info,
-            message,
-        });
+            task.reject({
+                info,
+                message,
+            });
+        } else {
+            this.logger("download:onError (orphaned)", taskId, message);
+        }
     }
 }
 

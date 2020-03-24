@@ -178,14 +178,18 @@ export class Conservify extends Common {
                 owner.logger("upload:onError", taskId, message);
 
                 const task = active[taskId];
-                const { info } = task;
+                if (task) {
+                    const { info } = task;
 
-                delete active[taskId];
+                    delete active[taskId];
 
-                task.reject({
-                    info,
-                    message,
-                });
+                    task.reject({
+                        info,
+                        message,
+                    });
+                } else {
+                    owner.logger("upload:onError (orphaned)", taskId, message);
+                }
             },
         });
 
@@ -201,7 +205,7 @@ export class Conservify extends Common {
                         progress(total, bytes, info);
                     }
                 } else {
-                    owner.logger("download:onProgress orphaned", taskId, bytes, total);
+                    owner.logger("download:onProgress (orphaned)", taskId, bytes, total);
                 }
             },
 
@@ -241,14 +245,18 @@ export class Conservify extends Common {
                 owner.logger("download:onError", taskId, message);
 
                 const task = active[taskId];
-                const { info } = task;
+                if (task) {
+                    const { info } = task;
 
-                delete active[taskId];
+                    delete active[taskId];
 
-                task.reject({
-                    info,
-                    message,
-                });
+                    task.reject({
+                        info,
+                        message,
+                    });
+                } else {
+                    owner.logger("download:onError (orphaned)", taskId, message);
+                }
             },
         });
 
