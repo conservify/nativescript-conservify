@@ -198,11 +198,16 @@ class UploadListener extends NSObject implements WebTransferListener {
     public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
         this.logger("upload:onProgress", taskId, bytes, total);
 
-        const { info } = this.tasks.getTask(taskId);
-        const { progress } = info;
+        const task = this.tasks.getTask(taskId);
+        if (task) {
+            const { info } = task;
+            const { progress } = info;
 
-        if (progress) {
-            progress(bytes, total, info);
+            if (progress) {
+                progress(bytes, total, info);
+            }
+        } else {
+            this.logger("upload:onProgress orphaned", taskId, bytes, total);
         }
     }
 
@@ -277,11 +282,16 @@ class DownloadListener extends NSObject implements WebTransferListener {
     public onProgressWithTaskIdHeadersBytesTotal(taskId: string, headers: any, bytes: number, total: number) {
         this.logger("download:onProgress", taskId, bytes, total);
 
-        const { info } = this.tasks.getTask(taskId);
-        const { progress } = info;
+        const task = this.tasks.getTask(taskId);
+        if (task) {
+            const { info } = task;
+            const { progress } = info;
 
-        if (progress) {
-            progress(bytes, total);
+            if (progress) {
+                progress(bytes, total);
+            }
+        } else {
+            this.logger("download:onProgress orphaned", taskId, bytes, total);
         }
     }
 

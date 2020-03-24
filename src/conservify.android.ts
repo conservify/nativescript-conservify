@@ -130,11 +130,15 @@ export class Conservify extends Common {
             onProgress(taskId: string, headers: any, bytes: number, total: number) {
                 owner.logger("upload:onProgress", taskId, bytes, total);
 
-                const { info } = active[taskId];
-                const { progress } = info;
+                if (active[taskId]) {
+                    const { info } = active[taskId];
+                    const { progress } = info;
 
-                if (progress) {
-                    progress(total, bytes, info);
+                    if (progress) {
+                        progress(total, bytes, info);
+                    }
+                } else {
+                    this.logger("upload:onProgress orphaned", taskId, bytes, total);
                 }
             },
 
@@ -189,11 +193,15 @@ export class Conservify extends Common {
             onProgress(taskId: string, headers: any, bytes: number, total: number) {
                 owner.logger("download:onProgress", taskId, bytes, total);
 
-                const { info } = active[taskId];
-                const { progress } = info;
+                if (active[taskId]) {
+                    const { info } = active[taskId];
+                    const { progress } = info;
 
-                if (progress) {
-                    progress(total, bytes, info);
+                    if (progress) {
+                        progress(total, bytes, info);
+                    }
+                } else {
+                    owner.logger("download:onProgress orphaned", taskId, bytes, total);
                 }
             },
 
