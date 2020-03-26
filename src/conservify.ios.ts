@@ -223,30 +223,34 @@ class UploadListener extends NSObject implements WebTransferListener {
         this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
-        const { info, transfer } = task;
+        if (task) {
+            const { info, transfer } = task;
 
-        this.tasks.removeTask(taskId);
+            this.tasks.removeTask(taskId);
 
-        function getBody() {
-            if (body) {
-                if (contentType.indexOf("application/json") >= 0) {
-                    return JSON.parse(body);
-                } else {
-                    if (transfer.base64EncodeResponseBody) {
-                        return Buffer.from(body, "base64");
+            function getBody() {
+                if (body) {
+                    if (contentType.indexOf("application/json") >= 0) {
+                        return JSON.parse(body);
+                    } else {
+                        if (transfer.base64EncodeResponseBody) {
+                            return Buffer.from(body, "base64");
+                        }
+                        return body;
                     }
-                    return body;
                 }
+                return null;
             }
-            return null;
-        }
 
-        task.resolve({
-            info,
-            headers: jsHeaders,
-            statusCode,
-            body: getBody(),
-        });
+            task.resolve({
+                info,
+                headers: jsHeaders,
+                statusCode,
+                body: getBody(),
+            });
+        } else {
+            this.logger("upload:onComplete (orphaned)", taskId, jsHeaders, contentType, statusCode);
+        }
     }
 
     public onErrorWithTaskIdMessage(taskId: string, message: string) {
@@ -311,30 +315,34 @@ class DownloadListener extends NSObject implements WebTransferListener {
         this.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
         const task = this.tasks.getTask(taskId);
-        const { info, transfer } = task;
+        if (task) {
+            const { info, transfer } = task;
 
-        this.tasks.removeTask(taskId);
+            this.tasks.removeTask(taskId);
 
-        function getBody() {
-            if (body) {
-                if (contentType.indexOf("application/json") >= 0) {
-                    return JSON.parse(body);
-                } else {
-                    if (transfer.base64EncodeResponseBody) {
-                        return Buffer.from(body, "base64");
+            function getBody() {
+                if (body) {
+                    if (contentType.indexOf("application/json") >= 0) {
+                        return JSON.parse(body);
+                    } else {
+                        if (transfer.base64EncodeResponseBody) {
+                            return Buffer.from(body, "base64");
+                        }
+                        return body;
                     }
-                    return body;
                 }
+                return null;
             }
-            return null;
-        }
 
-        task.resolve({
-            info,
-            headers: jsHeaders,
-            statusCode,
-            body: getBody(),
-        });
+            task.resolve({
+                info,
+                headers: jsHeaders,
+                statusCode,
+                body: getBody(),
+            });
+        } else {
+            this.logger("download:onComplete (orphaned)", taskId, jsHeaders, contentType, statusCode);
+        }
     }
 
     public onErrorWithTaskIdMessage(taskId: string, message: string) {

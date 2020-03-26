@@ -148,30 +148,34 @@ export class Conservify extends Common {
                 owner.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
-                const { info, transfer } = task;
+                if (task) {
+                    const { info, transfer } = task;
 
-                function getBody() {
-                    if (body) {
-                        if (contentType.indexOf("application/json") >= 0) {
-                            return JSON.parse(body);
-                        } else {
-                            if (transfer.isBase64EncodeResponseBody()) {
-                                return Buffer.from(body, "base64");
+                    function getBody() {
+                        if (body) {
+                            if (contentType.indexOf("application/json") >= 0) {
+                                return JSON.parse(body);
+                            } else {
+                                if (transfer.isBase64EncodeResponseBody()) {
+                                    return Buffer.from(body, "base64");
+                                }
+                                return body;
                             }
-                            return body;
                         }
+                        return null;
                     }
-                    return null;
+
+                    delete active[taskId];
+
+                    task.resolve({
+                        info,
+                        headers: jsHeaders,
+                        statusCode,
+                        body: getBody(),
+                    });
+                } else {
+                    owner.logger("upload:onComplete (orphaned)", taskId, jsHeaders, contentType, statusCode);
                 }
-
-                delete active[taskId];
-
-                task.resolve({
-                    info,
-                    headers: jsHeaders,
-                    statusCode,
-                    body: getBody(),
-                });
             },
 
             onError(taskId: string, message: string) {
@@ -215,30 +219,34 @@ export class Conservify extends Common {
                 owner.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
 
                 const task = active[taskId];
-                const { info, transfer } = task;
+                if (task) {
+                    const { info, transfer } = task;
 
-                function getBody() {
-                    if (body) {
-                        if (contentType.indexOf("application/json") >= 0) {
-                            return JSON.parse(body);
-                        } else {
-                            if (transfer.isBase64EncodeResponseBody()) {
-                                return Buffer.from(body, "base64");
+                    function getBody() {
+                        if (body) {
+                            if (contentType.indexOf("application/json") >= 0) {
+                                return JSON.parse(body);
+                            } else {
+                                if (transfer.isBase64EncodeResponseBody()) {
+                                    return Buffer.from(body, "base64");
+                                }
+                                return body;
                             }
-                            return body;
                         }
+                        return null;
                     }
-                    return null;
+
+                    delete active[taskId];
+
+                    task.resolve({
+                        info,
+                        headers: jsHeaders,
+                        statusCode,
+                        body: getBody(),
+                    });
+                } else {
+                    owner.logger("download:onComplete (orphaned)", taskId, jsHeaders, contentType, statusCode);
                 }
-
-                delete active[taskId];
-
-                task.resolve({
-                    info,
-                    headers: jsHeaders,
-                    statusCode,
-                    body: getBody(),
-                });
             },
 
             onError(taskId: string, message: string) {
