@@ -204,7 +204,7 @@ class UploadListener extends NSObject implements WebTransferListener {
             const { progress } = info;
 
             if (progress) {
-                progress(bytes, total, info);
+                progress(total, bytes, info);
             }
         } else {
             this.logger("upload:onProgress (orphaned)", taskId, bytes, total);
@@ -296,7 +296,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
             const { progress } = info;
 
             if (progress) {
-                progress(bytes, total);
+                progress(total, bytes, info);
             }
         } else {
             this.logger("download:onProgress (orphaned)", taskId, bytes, total);
