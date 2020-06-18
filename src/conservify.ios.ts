@@ -1,4 +1,4 @@
-import { Common } from "./conservify.common";
+import { Common, ConnectionError } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -136,7 +136,7 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     }
 
     public onDiscoveryFailed() {
-        this.promises.getStartedPromise().reject();
+        this.promises.getStartedPromise().reject(new Error("discovery failed"));
     }
 
     public onFoundServiceWithService(service: ServiceInfo) {
@@ -262,10 +262,7 @@ class UploadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId, message);
 
-            task.reject({
-                info,
-                message,
-            });
+            task.reject(new ConnectionError(message, info));
         } else {
             this.logger("upload:onError (orphaned)", taskId);
         }
@@ -354,10 +351,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId);
 
-            task.reject({
-                info,
-                message,
-            });
+            task.reject(new ConnectionError(message, info));
         } else {
             this.logger("download:onError (orphaned)", taskId, message);
         }

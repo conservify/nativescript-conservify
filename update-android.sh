@@ -2,6 +2,8 @@
 
 set -xe
 
+cd src && npm run build || true
+
 if [ -d ../fk-networking ]; then
 	pushd ../fk-networking
 	./gradlew clean build

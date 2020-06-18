@@ -5,3 +5,10 @@ export class Common extends Observable {
         super();
     }
 }
+
+export class ConnectionError extends Error {
+    constructor(message, info) {
+        super(message);
+        this.info = info;
+    }
+}

@@ -33,7 +33,7 @@ var Conservify = (function (_super) {
                 owner.started.resolve();
             },
             onDiscoveryFailed: function () {
-                owner.started.reject();
+                owner.started.reject(new Error("discovery failed"));
             },
             onFoundService: function (service) {
                 owner.logger("onFoundService", service.getName(), service.getType(), service.getAddress(), service.getPort());
@@ -147,10 +147,7 @@ var Conservify = (function (_super) {
                 if (task) {
                     var info = task.info;
                     delete active[taskId];
-                    task.reject({
-                        info: info,
-                        message: message,
-                    });
+                    task.reject(new conservify_common_1.ConnectionError(message, info));
                 }
                 else {
                     owner.logger("upload:onError (orphaned)", taskId, message);
@@ -209,10 +206,7 @@ var Conservify = (function (_super) {
                 if (task) {
                     var info = task.info;
                     delete active[taskId];
-                    task.reject({
-                        info: info,
-                        message: message,
-                    });
+                    task.reject(new conservify_common_1.ConnectionError(message, info));
                 }
                 else {
                     owner.logger("download:onError (orphaned)", taskId, message);

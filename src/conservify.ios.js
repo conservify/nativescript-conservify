@@ -28,7 +28,7 @@ var MyNetworkingListener = (function (_super) {
         this.promises.getStartedPromise().resolve();
     };
     MyNetworkingListener.prototype.onDiscoveryFailed = function () {
-        this.promises.getStartedPromise().reject();
+        this.promises.getStartedPromise().reject(new Error("discovery failed"));
     };
     MyNetworkingListener.prototype.onFoundServiceWithService = function (service) {
         this.logger("onFoundServiceWithService", service.type, service.name, service.host, service.port);
@@ -127,10 +127,7 @@ var UploadListener = (function (_super) {
         if (task) {
             var info = task.info;
             this.tasks.removeTask(taskId, message);
-            task.reject({
-                info: info,
-                message: message,
-            });
+            task.reject(new conservify_common_1.ConnectionError(message, info));
         }
         else {
             this.logger("upload:onError (orphaned)", taskId);
@@ -204,10 +201,7 @@ var DownloadListener = (function (_super) {
         if (task) {
             var info = task.info;
             this.tasks.removeTask(taskId);
-            task.reject({
-                info: info,
-                message: message,
-            });
+            task.reject(new conservify_common_1.ConnectionError(message, info));
         }
         else {
             this.logger("download:onError (orphaned)", taskId, message);

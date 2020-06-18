@@ -1,4 +1,4 @@
-import { Common } from "./conservify.common";
+import { Common, ConnectionError } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -52,7 +52,7 @@ export class Conservify extends Common {
             },
 
             onDiscoveryFailed() {
-                owner.started.reject();
+                owner.started.reject(new Error("discovery failed"));
             },
 
             onFoundService(service: any) {
@@ -187,10 +187,7 @@ export class Conservify extends Common {
 
                     delete active[taskId];
 
-                    task.reject({
-                        info,
-                        message,
-                    });
+                    task.reject(new ConnectionError(message, info));
                 } else {
                     owner.logger("upload:onError (orphaned)", taskId, message);
                 }
@@ -258,10 +255,7 @@ export class Conservify extends Common {
 
                     delete active[taskId];
 
-                    task.reject({
-                        info,
-                        message,
-                    });
+                    task.reject(new ConnectionError(message, info));
                 } else {
                     owner.logger("download:onError (orphaned)", taskId, message);
                 }
