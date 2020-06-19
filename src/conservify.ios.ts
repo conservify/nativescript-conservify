@@ -66,6 +66,51 @@ declare class ServiceInfo extends NSObject {
     public port: number;
 }
 
+declare class ReadOptions extends NSObject {
+    static alloc(): ReadOptions;
+
+    static new(): ReadOptions;
+
+    public batchSize: number;
+}
+
+declare class PbFile {
+    readInfoWithToken(token: string): boolean;
+    readDelimitedWithTokenOptions(token: string, options: ReadOptions): boolean;
+}
+
+interface FileSystemListener {
+    onFileInfoWithPathTokenInfo(path: string, token: string, info: any): void;
+    onFileRecordsWithPathTokenPositionSizeRecords(path: string, token: string, position: number, size: number, records: any): void;
+    onFileErrorWithPathTokenError(path: string, token: string, error: string): void;
+}
+
+declare var FileSystemListener: {
+    prototype: FileSystemListener;
+};
+
+declare class FileSystem extends NSObject {
+    static alloc(): FileSystem; // inherited from NSObject
+
+    static new(): FileSystem; // inherited from NSObject
+
+    initWithListener(listener: FileSystemListener): FileSystem;
+
+    openWithPath(path: string): PbFile;
+
+    newToken(): String;
+}
+
+declare class SampleData extends NSObject {
+    static alloc(): SampleData; // inherited from NSObject
+
+    static new(): SampleData; // inherited from NSObject
+
+    init(): SampleData;
+
+    write(): String;
+}
+
 declare class ServiceDiscovery extends NSObject {
     startWithServiceType(serviceType: string): void;
 }
@@ -96,16 +141,6 @@ declare class Networking extends NSObject {
     web: Web;
     wifi: WifiNetworksManager;
 }
-
-const NetworkingProto = global.Networking;
-const ServiceDiscoveryProto = global.ServiceDiscovery;
-const WebProto = global.Web;
-const NetworkingListenerProto = global.NetworkingListener;
-const WebTransferListenerProto = global.WebTransferListener;
-const ServiceInfoProto = global.ServiceInfo;
-const WebTransferProto = global.WebTransfer;
-const WifiNetworkProto = global.WifiNetwork;
-const WifiManagerProto = global.WifiManager;
 
 interface OtherPromises {
     getStartedPromise(): Promise;
@@ -358,6 +393,109 @@ class DownloadListener extends NSObject implements WebTransferListener {
     }
 }
 
+class MyFileSystemListener extends NSObject implements FileSystemListener {
+    public static ObjCProtocols = [FileSystemListener];
+
+    logger: any;
+
+    static alloc(): MyFileSystemListener {
+        return <MyFileSystemListener>super.new();
+    }
+
+    public initWithTasks(tasks: ActiveTasks, logger: any): MyFileSystemListener {
+        this.tasks = tasks;
+        this.logger = logger;
+        return <MyFileSystemListener>this;
+    }
+
+    public onFileInfoWithPathTokenInfo(path: string, token: string, info: any): void {
+        console.log("fs:onFileInfo", path, token, info);
+
+        const task = this.tasks.getTask(token);
+        if (task) {
+            const { resolve } = task;
+            resolve(info);
+        }
+    }
+
+    public onFileRecordsWithPathTokenPositionSizeRecords(path: string, token: string, position: number, size: number, records: any): void {
+        console.log("fs:onFileRecords", path, token, position, size, records != null ? records.count : "");
+
+        const task = this.tasks.getTask(token);
+        if (task) {
+            const { resolve, listener } = task;
+            if (records) {
+                listener(position, size, records);
+            } else {
+                resolve();
+            }
+        }
+    }
+
+    public onFileErrorWithPathTokenError(path: string, token: string, error: string): void {
+        console.log("fs:onFileError", path, token, error);
+
+        const task = this.tasks.getTask(token);
+        if (task) {
+            const { reject } = task;
+            reject(error);
+        }
+    }
+}
+
+class OpenedFile {
+    cfy: Conservify;
+    fs: FileSystem;
+    file: PbFile;
+
+    public constructor(cfy: Conservify, file: PbFile) {
+        this.cfy = cfy;
+        this.fs = cfy.fileSystem;
+        this.file = file;
+    }
+
+    public info() {
+        return new Promise((resolve, reject) => {
+            const token = this.fs.newToken();
+            this.file.readInfoWithToken(token);
+
+            this.cfy.active[token] = {
+                resolve,
+                reject,
+            };
+        });
+    }
+
+    public delimited(listener) {
+        return new Promise((resolve, reject) => {
+            const token = this.fs.newToken();
+            const options = new ReadOptions();
+            options.batchSize = 10;
+            this.file.readDelimitedWithTokenOptions(token, options);
+
+            this.cfy.active[token] = {
+                listener,
+                resolve,
+                reject,
+            };
+        });
+    }
+}
+
+const NetworkingProto = global.Networking;
+const ServiceDiscoveryProto = global.ServiceDiscovery;
+const WebProto = global.Web;
+const NetworkingListenerProto = global.NetworkingListener;
+const WebTransferListenerProto = global.WebTransferListener;
+const ServiceInfoProto = global.ServiceInfo;
+const WebTransferProto = global.WebTransfer;
+const WifiNetworkProto = global.WifiNetwork;
+const WifiManagerProto = global.WifiManager;
+const FileSystemListenerProto = global.FileSystemListener;
+const FileSystemProto = global.FileSystem;
+const PbFileProto = global.PbFile;
+const SampleDataProto = global.SampleData;
+
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
     logger: any;
     active: { [key: string]: any };
@@ -365,6 +503,7 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     started: any;
 
     networking: Networking;
+    fileSystem: FileSystem;
     networkingListener: MyNetworkingListener;
     uploadListener: WebTransferListener;
     downloadListener: WebTransferListener;
@@ -397,6 +536,9 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
             this.downloadListener
         );
 
+        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
+        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
+
         return new Promise((resolve, reject) => {
             this.logger("initialize, ok");
 
@@ -409,6 +551,15 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
 
             this.logger("starting...");
         });
+    }
+
+    public writeSampleData() {
+        const sampleData: SampleData = SampleData.alloc().init();
+        return Promise.resolve(sampleData.write());
+    }
+
+    public open(path) {
+        return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
     }
 
     public json(info) {

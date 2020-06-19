@@ -12,13 +12,13 @@ function toJsHeaders(headers) {
     }
     return jsHeaders;
 }
-var FileWrapper = (function () {
-    function FileWrapper(cfy, file) {
+var OpenedFile = (function () {
+    function OpenedFile(cfy, file) {
         this.cfy = cfy;
         this.fs = cfy.fileSystem;
         this.file = file;
     }
-    FileWrapper.prototype.info = function () {
+    OpenedFile.prototype.info = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var token = _this.fs.newToken();
@@ -29,21 +29,7 @@ var FileWrapper = (function () {
             };
         });
     };
-    FileWrapper.prototype.records = function (listener) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            var token = _this.fs.newToken();
-            var options = new org.conservify.data.ReadOptions();
-            options.setBatchSize(10);
-            _this.file.readDataRecords(token, options);
-            _this.cfy.active[token] = {
-                listener: listener,
-                resolve: resolve,
-                reject: reject,
-            };
-        });
-    };
-    FileWrapper.prototype.delimited = function (listener) {
+    OpenedFile.prototype.delimited = function (listener) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             var token = _this.fs.newToken();
@@ -57,7 +43,7 @@ var FileWrapper = (function () {
             };
         });
     };
-    return FileWrapper;
+    return OpenedFile;
 }());
 var Conservify = (function (_super) {
     __extends(Conservify, _super);
@@ -307,7 +293,7 @@ var Conservify = (function (_super) {
         return Promise.resolve(sampleData.write());
     };
     Conservify.prototype.open = function (path) {
-        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
+        return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     };
     Conservify.prototype.text = function (info) {
         var _this = this;

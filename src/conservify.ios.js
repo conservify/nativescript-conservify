@@ -210,6 +210,20 @@ var DownloadListener = (function (_super) {
     DownloadListener.ObjCProtocols = [WebTransferListener];
     return DownloadListener;
 }(NSObject));
+var MyFileSystemListener = (function (_super) {
+    __extends(MyFileSystemListener, _super);
+    function MyFileSystemListener() {
+        var _this = this;
+        return _this;
+    }
+    return MyFileSystemListener;
+}(NSObject));
+var FileWrapper = (function () {
+    function FileWrapper() {
+    }
+    FileWrapper.prototype.contructor = function () { };
+    return FileWrapper;
+}());
 var Conservify = (function (_super) {
     __extends(Conservify, _super);
     function Conservify(discoveryEvents, logger) {
@@ -233,6 +247,8 @@ var Conservify = (function (_super) {
         this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
+        this.fsListener = MyFileSystemListener.alloc().init();
+        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
         return new Promise(function (resolve, reject) {
             _this.logger("initialize, ok");
             _this.started = {
@@ -242,6 +258,12 @@ var Conservify = (function (_super) {
             _this.networking.serviceDiscovery.startWithServiceType(serviceType);
             _this.logger("starting...");
         });
+    };
+    Conservify.prototype.writeSampleData = function () {
+        return null;
+    };
+    Conservify.prototype.open = function (path) {
+        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
     };
     Conservify.prototype.json = function (info) {
         var _this = this;

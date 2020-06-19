@@ -15,18 +15,18 @@ function toJsHeaders(headers) {
     return jsHeaders;
 }
 
-class FileWrapper {
+class OpenedFile {
     cfy: Conservify;
     fs: any;
     file: any;
 
-    constructor(cfy: Conservify, file: any) {
+    public constructor(cfy: Conservify, file: any) {
         this.cfy = cfy;
         this.fs = cfy.fileSystem;
         this.file = file;
     }
 
-    info() {
+    public info() {
         return new Promise((resolve, reject) => {
             const token = this.fs.newToken();
             this.file.readInfo(token);
@@ -38,7 +38,8 @@ class FileWrapper {
         });
     }
 
-    records(listener) {
+    /*
+    public records(listener) {
         return new Promise((resolve, reject) => {
             const token = this.fs.newToken();
             const options = new org.conservify.data.ReadOptions();
@@ -52,8 +53,9 @@ class FileWrapper {
             };
         });
     }
+	*/
 
-    delimited(listener) {
+    public delimited(listener) {
         return new Promise((resolve, reject) => {
             const token = this.fs.newToken();
             const options = new org.conservify.data.ReadOptions();
@@ -379,7 +381,7 @@ export class Conservify extends Common {
     }
 
     public open(path) {
-        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
+        return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     }
 
     public text(info) {

@@ -49,7 +49,7 @@ function createViewModel() {
             return conservify
                 .open("missing-file.fkpb")
                 .then(file => {
-                    console.log("opened", file);
+                    console.log("opened file");
                     return file.info().then(
                         info => {
                             console.log("info", info);
@@ -61,13 +61,11 @@ function createViewModel() {
                 })
                 .then(() => {
                     return conservify.writeSampleData().then(file => {
-                        console.log("file", file);
-
-                        console.log("file.path", file.path);
+                        console.log("sample data", file);
 
                         return conservify.open(file).then(
                             file => {
-                                console.log("opened", file);
+                                console.log("opened file");
                                 return file
                                     .info()
                                     .then(
@@ -78,15 +76,6 @@ function createViewModel() {
                                             console.log("error getting info", err);
                                         }
                                     )
-                                    .then(() => {
-                                        return file
-                                            .records((position, size, records) => {
-                                                console.log("records", position, size, records);
-                                            })
-                                            .then(() => {
-                                                console.log("done reading");
-                                            });
-                                    })
                                     .then(() => {
                                         return file
                                             .delimited((position, size, records) => {
