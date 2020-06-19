@@ -1,15 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var conservify_common_1 = require("./conservify.common");
-var NetworkingProto = global.Networking;
-var ServiceDiscoveryProto = global.ServiceDiscovery;
-var WebProto = global.Web;
-var NetworkingListenerProto = global.NetworkingListener;
-var WebTransferListenerProto = global.WebTransferListener;
-var ServiceInfoProto = global.ServiceInfo;
-var WebTransferProto = global.WebTransfer;
-var WifiNetworkProto = global.WifiNetwork;
-var WifiManagerProto = global.WifiManager;
 var MyNetworkingListener = (function (_super) {
     __extends(MyNetworkingListener, _super);
     function MyNetworkingListener() {
@@ -213,17 +204,94 @@ var DownloadListener = (function (_super) {
 var MyFileSystemListener = (function (_super) {
     __extends(MyFileSystemListener, _super);
     function MyFileSystemListener() {
-        var _this = this;
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
+    MyFileSystemListener.alloc = function () {
+        return _super.new.call(this);
+    };
+    MyFileSystemListener.prototype.initWithTasks = function (tasks, logger) {
+        this.tasks = tasks;
+        this.logger = logger;
+        return this;
+    };
+    MyFileSystemListener.prototype.onFileInfoWithPathTokenInfo = function (path, token, info) {
+        console.log("fs:onFileInfo", path, token, info);
+        var task = this.tasks.getTask(token);
+        if (task) {
+            var resolve = task.resolve;
+            resolve(info);
+        }
+    };
+    MyFileSystemListener.prototype.onFileRecordsWithPathTokenPositionSizeRecords = function (path, token, position, size, records) {
+        console.log("fs:onFileRecords", path, token, position, size, records != null ? records.count : "");
+        var task = this.tasks.getTask(token);
+        if (task) {
+            var resolve = task.resolve, listener = task.listener;
+            if (records) {
+                listener(position, size, records);
+            }
+            else {
+                resolve();
+            }
+        }
+    };
+    MyFileSystemListener.prototype.onFileErrorWithPathTokenError = function (path, token, error) {
+        console.log("fs:onFileError", path, token, error);
+        var task = this.tasks.getTask(token);
+        if (task) {
+            var reject = task.reject;
+            reject(error);
+        }
+    };
+    MyFileSystemListener.ObjCProtocols = [FileSystemListener];
     return MyFileSystemListener;
 }(NSObject));
-var FileWrapper = (function () {
-    function FileWrapper() {
+var OpenedFile = (function () {
+    function OpenedFile(cfy, file) {
+        this.cfy = cfy;
+        this.fs = cfy.fileSystem;
+        this.file = file;
     }
-    FileWrapper.prototype.contructor = function () { };
-    return FileWrapper;
+    OpenedFile.prototype.info = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var token = _this.fs.newToken();
+            _this.file.readInfoWithToken(token);
+            _this.cfy.active[token] = {
+                resolve: resolve,
+                reject: reject,
+            };
+        });
+    };
+    OpenedFile.prototype.delimited = function (listener) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var token = _this.fs.newToken();
+            var options = new ReadOptions();
+            options.batchSize = 10;
+            _this.file.readDelimitedWithTokenOptions(token, options);
+            _this.cfy.active[token] = {
+                listener: listener,
+                resolve: resolve,
+                reject: reject,
+            };
+        });
+    };
+    return OpenedFile;
 }());
+var NetworkingProto = global.Networking;
+var ServiceDiscoveryProto = global.ServiceDiscovery;
+var WebProto = global.Web;
+var NetworkingListenerProto = global.NetworkingListener;
+var WebTransferListenerProto = global.WebTransferListener;
+var ServiceInfoProto = global.ServiceInfo;
+var WebTransferProto = global.WebTransfer;
+var WifiNetworkProto = global.WifiNetwork;
+var WifiManagerProto = global.WifiManager;
+var FileSystemListenerProto = global.FileSystemListener;
+var FileSystemProto = global.FileSystem;
+var PbFileProto = global.PbFile;
+var SampleDataProto = global.SampleData;
 var Conservify = (function (_super) {
     __extends(Conservify, _super);
     function Conservify(discoveryEvents, logger) {
@@ -247,7 +315,7 @@ var Conservify = (function (_super) {
         this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
         this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
-        this.fsListener = MyFileSystemListener.alloc().init();
+        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
         this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
         return new Promise(function (resolve, reject) {
             _this.logger("initialize, ok");
@@ -260,10 +328,11 @@ var Conservify = (function (_super) {
         });
     };
     Conservify.prototype.writeSampleData = function () {
-        return null;
+        var sampleData = SampleData.alloc().init();
+        return Promise.resolve(sampleData.write());
     };
     Conservify.prototype.open = function (path) {
-        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
+        return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
     };
     Conservify.prototype.json = function (info) {
         var _this = this;
