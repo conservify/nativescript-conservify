@@ -38,16 +38,72 @@ function createViewModel() {
         .getFolder("fk")
         .getFile("test.bin");
 
-    console.log("fileSystem", conservify.fileSystem);
-
-    console.log("fileSystem", conservify.fileSystem.openData());
-
     console.log("where", where.path);
 
     console.log("conservify", conservify);
 
     conservify
         .start("_fk._tcp")
+        .then(() => {
+            console.log("fileSystem", conservify.fileSystem, "opening file");
+            return conservify
+                .open("missing-file.fkpb")
+                .then(file => {
+                    console.log("opened", file);
+                    return file.info().then(
+                        info => {
+                            console.log("info", info);
+                        },
+                        err => {
+                            console.log("error getting info", err);
+                        }
+                    );
+                })
+                .then(() => {
+                    return conservify.writeSampleData().then(file => {
+                        console.log("file", file);
+
+                        console.log("file.path", file.path);
+
+                        return conservify.open(file).then(
+                            file => {
+                                console.log("opened", file);
+                                return file
+                                    .info()
+                                    .then(
+                                        info => {
+                                            console.log("info", info);
+                                        },
+                                        err => {
+                                            console.log("error getting info", err);
+                                        }
+                                    )
+                                    .then(() => {
+                                        return file
+                                            .records((position, size, records) => {
+                                                console.log("records", position, size, records);
+                                            })
+                                            .then(() => {
+                                                console.log("done reading");
+                                            });
+                                    })
+                                    .then(() => {
+                                        return file
+                                            .delimited((position, size, records) => {
+                                                console.log("records", position, size, records);
+                                            })
+                                            .then(() => {
+                                                console.log("done reading");
+                                            });
+                                    });
+                            },
+                            () => {
+                                console.log("ERROR");
+                            }
+                        );
+                    });
+                });
+        })
         .then(() => {
             console.log("started, getting json");
 

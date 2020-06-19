@@ -1,4 +1,4 @@
-import { Common, ConnectionError } from "./conservify.common";
+import { Common, ConnectionError, FileSystemError } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -13,6 +13,60 @@ function toJsHeaders(headers) {
         jsHeaders[key.toLowerCase()] = entry.getValue();
     }
     return jsHeaders;
+}
+
+class FileWrapper {
+    cfy: Conservify;
+    fs: any;
+    file: any;
+
+    constructor(cfy: Conservify, file: any) {
+        this.cfy = cfy;
+        this.fs = cfy.fileSystem;
+        this.file = file;
+    }
+
+    info() {
+        return new Promise((resolve, reject) => {
+            const token = this.fs.newToken();
+            this.file.readInfo(token);
+
+            this.cfy.active[token] = {
+                resolve,
+                reject,
+            };
+        });
+    }
+
+    records(listener) {
+        return new Promise((resolve, reject) => {
+            const token = this.fs.newToken();
+            const options = new org.conservify.data.ReadOptions();
+            options.setBatchSize(10);
+            this.file.readDataRecords(token, options);
+
+            this.cfy.active[token] = {
+                listener,
+                resolve,
+                reject,
+            };
+        });
+    }
+
+    delimited(listener) {
+        return new Promise((resolve, reject) => {
+            const token = this.fs.newToken();
+            const options = new org.conservify.data.ReadOptions();
+            options.setBatchSize(10);
+            this.file.readDelimited(token, options);
+
+            this.cfy.active[token] = {
+                listener,
+                resolve,
+                reject,
+            };
+        });
+    }
 }
 
 export class Conservify extends Common {
@@ -262,21 +316,43 @@ export class Conservify extends Common {
             },
         });
 
-        this.dataListener = new org.conservify.data.DataListener({
-            onFileInfo(path: string, info: any) {
-                owner.logger("fs:onFileInfo", path, info);
+        this.recordListener = new org.conservify.data.RecordListener({
+            onFileInfo(path: string, token: string, info: any) {
+                owner.logger("fs:onFileInfo", path, token, info);
+
+                const task = active[token];
+                if (task) {
+                    task.resolve({
+                        path: info.getFile(),
+                        size: info.getSize(),
+                    });
+                }
             },
 
-            onFileRecords(path: string, records: any) {
-                owner.logger("fs:onFileRecords", path, records);
+            onFileRecords(path: string, token: string, position: Number, size: Number, records: any) {
+                owner.logger("fs:onFileRecords", path, token, position, size, records != null ? records.size() : "");
+
+                const task = active[token];
+                if (task) {
+                    if (records) {
+                        task.listener(position, size, records);
+                    } else {
+                        task.resolve();
+                    }
+                }
             },
 
-            onFileAnalysis(path: string, analysis: any) {
-                owner.logger("fs:onFileAnalysis", path, analysis);
+            onFileError(path: string, token: string, message: string) {
+                owner.logger("fs:onFileError", path, token, message);
+
+                const task = active[token];
+                if (task) {
+                    task.reject(new FileSystemError(message, path));
+                }
             },
         });
 
-        this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.dataListener);
+        this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.recordListener);
 
         this.networking = new org.conservify.networking.Networking(
             androidApp.context,
@@ -295,6 +371,15 @@ export class Conservify extends Common {
 
             owner.logger("starting...");
         });
+    }
+
+    public writeSampleData() {
+        const sampleData = new org.conservify.data.SampleData();
+        return Promise.resolve(sampleData.write());
+    }
+
+    public open(path) {
+        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
     }
 
     public text(info) {

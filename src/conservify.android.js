@@ -12,6 +12,53 @@ function toJsHeaders(headers) {
     }
     return jsHeaders;
 }
+var FileWrapper = (function () {
+    function FileWrapper(cfy, file) {
+        this.cfy = cfy;
+        this.fs = cfy.fileSystem;
+        this.file = file;
+    }
+    FileWrapper.prototype.info = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var token = _this.fs.newToken();
+            _this.file.readInfo(token);
+            _this.cfy.active[token] = {
+                resolve: resolve,
+                reject: reject,
+            };
+        });
+    };
+    FileWrapper.prototype.records = function (listener) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var token = _this.fs.newToken();
+            var options = new org.conservify.data.ReadOptions();
+            options.setBatchSize(10);
+            _this.file.readDataRecords(token, options);
+            _this.cfy.active[token] = {
+                listener: listener,
+                resolve: resolve,
+                reject: reject,
+            };
+        });
+    };
+    FileWrapper.prototype.delimited = function (listener) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var token = _this.fs.newToken();
+            var options = new org.conservify.data.ReadOptions();
+            options.setBatchSize(10);
+            _this.file.readDelimited(token, options);
+            _this.cfy.active[token] = {
+                listener: listener,
+                resolve: resolve,
+                reject: reject,
+            };
+        });
+    };
+    return FileWrapper;
+}());
 var Conservify = (function (_super) {
     __extends(Conservify, _super);
     function Conservify(discoveryEvents, logger) {
@@ -213,18 +260,38 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.dataListener = new org.conservify.data.DataListener({
-            onFileInfo: function (path, info) {
-                owner.logger("fs:onFileInfo", path, info);
+        this.recordListener = new org.conservify.data.RecordListener({
+            onFileInfo: function (path, token, info) {
+                owner.logger("fs:onFileInfo", path, token, info);
+                var task = active[token];
+                if (task) {
+                    task.resolve({
+                        path: info.getFile(),
+                        size: info.getSize(),
+                    });
+                }
             },
-            onFileRecords: function (path, records) {
-                owner.logger("fs:onFileRecords", path, records);
+            onFileRecords: function (path, token, position, size, records) {
+                owner.logger("fs:onFileRecords", path, token, position, size, records != null ? records.size() : "");
+                var task = active[token];
+                if (task) {
+                    if (records) {
+                        task.listener(position, size, records);
+                    }
+                    else {
+                        task.resolve();
+                    }
+                }
             },
-            onFileAnalysis: function (path, analysis) {
-                owner.logger("fs:onFileAnalysis", path, analysis);
+            onFileError: function (path, token, message) {
+                owner.logger("fs:onFileError", path, token, message);
+                var task = active[token];
+                if (task) {
+                    task.reject(new conservify_common_1.FileSystemError(message, path));
+                }
             },
         });
-        this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, this.dataListener);
+        this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, this.recordListener);
         this.networking = new org.conservify.networking.Networking(application_1.android.context, this.networkingListener, this.uploadListener, this.downloadListener);
         return new Promise(function (resolve, reject) {
             _this.started = {
@@ -234,6 +301,12 @@ var Conservify = (function (_super) {
             _this.networking.getServiceDiscovery().start(serviceType);
             owner.logger("starting...");
         });
+    };
+    Conservify.prototype.writeSampleData = function () {
+        return Promise.resolve(this.fileSystem.writeSampleData());
+    };
+    Conservify.prototype.open = function (path) {
+        return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
     };
     Conservify.prototype.text = function (info) {
         var _this = this;

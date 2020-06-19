@@ -531,11 +531,11 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         return this.discoveryEvents;
     }
 
-    public getStartedPromise(): Promise {
+    public getStartedPromise(): Promise<any> {
         return this.started;
     }
 
-    public getNetworkStatusPromise(): Promise {
+    public getNetworkStatusPromise(): Promise<any> {
         return this.networkStatus;
     }
 
