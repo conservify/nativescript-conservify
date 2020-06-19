@@ -316,7 +316,7 @@ export class Conservify extends Common {
             },
         });
 
-        this.recordListener = new org.conservify.data.RecordListener({
+        this.fsListener = new org.conservify.data.FileSystemListener({
             onFileInfo(path: string, token: string, info: any) {
                 owner.logger("fs:onFileInfo", path, token, info);
 
@@ -352,7 +352,7 @@ export class Conservify extends Common {
             },
         });
 
-        this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.recordListener);
+        this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.fsListener);
 
         this.networking = new org.conservify.networking.Networking(
             androidApp.context,

@@ -260,7 +260,7 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.recordListener = new org.conservify.data.RecordListener({
+        this.fsListener = new org.conservify.data.FileSystemListener({
             onFileInfo: function (path, token, info) {
                 owner.logger("fs:onFileInfo", path, token, info);
                 var task = active[token];
@@ -291,7 +291,7 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, this.recordListener);
+        this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, this.fsListener);
         this.networking = new org.conservify.networking.Networking(application_1.android.context, this.networkingListener, this.uploadListener, this.downloadListener);
         return new Promise(function (resolve, reject) {
             _this.started = {
@@ -303,7 +303,8 @@ var Conservify = (function (_super) {
         });
     };
     Conservify.prototype.writeSampleData = function () {
-        return Promise.resolve(this.fileSystem.writeSampleData());
+        var sampleData = new org.conservify.data.SampleData();
+        return Promise.resolve(sampleData.write());
     };
     Conservify.prototype.open = function (path) {
         return Promise.resolve(new FileWrapper(this, this.fileSystem.open(path)));
