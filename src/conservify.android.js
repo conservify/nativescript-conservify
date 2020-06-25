@@ -88,7 +88,7 @@ var Conservify = (function (_super) {
             },
             onNetworkStatus: function (status) {
                 if (owner.networkStatus) {
-                    function getConnectedWifi() {
+                    var getConnectedWifi = function () {
                         if (status.getConnectedWifi() == null || status.getConnectedWifi().getSsid() == null) {
                             return null;
                         }
@@ -98,8 +98,8 @@ var Conservify = (function (_super) {
                                 .getSsid()
                                 .replace(/"/g, ""),
                         };
-                    }
-                    function getWifiNetworks() {
+                    };
+                    var getWifiNetworks = function () {
                         if (status.getWifiNetworks() == null) {
                             return null;
                         }
@@ -114,7 +114,7 @@ var Conservify = (function (_super) {
                             }
                         }
                         return found;
-                    }
+                    };
                     var jsObject = {
                         connected: status.getConnected(),
                         connectedWifi: getConnectedWifi(),
@@ -148,7 +148,7 @@ var Conservify = (function (_super) {
                 var task = active[taskId];
                 if (task) {
                     var info = task.info, transfer_1 = task.transfer;
-                    function getBody() {
+                    var getBody = function () {
                         if (body) {
                             if (contentType.indexOf("application/json") >= 0) {
                                 return JSON.parse(body);
@@ -161,7 +161,7 @@ var Conservify = (function (_super) {
                             }
                         }
                         return null;
-                    }
+                    };
                     delete active[taskId];
                     task.resolve({
                         info: info,
@@ -207,7 +207,7 @@ var Conservify = (function (_super) {
                 var task = active[taskId];
                 if (task) {
                     var info = task.info, transfer_2 = task.transfer;
-                    function getBody() {
+                    var getBody = function () {
                         if (body) {
                             if (contentType.indexOf("application/json") >= 0) {
                                 return JSON.parse(body);
@@ -220,7 +220,7 @@ var Conservify = (function (_super) {
                             }
                         }
                         return null;
-                    }
+                    };
                     delete active[taskId];
                     task.resolve({
                         info: info,

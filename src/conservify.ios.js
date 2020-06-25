@@ -16,7 +16,7 @@ var MyNetworkingListener = (function (_super) {
     };
     MyNetworkingListener.prototype.onStarted = function () {
         this.logger("onStarted");
-        this.promises.getStartedPromise().resolve();
+        this.promises.getStartedPromise().resolve(null);
     };
     MyNetworkingListener.prototype.onDiscoveryFailed = function () {
         this.promises.getStartedPromise().reject(new Error("discovery failed"));
@@ -87,7 +87,7 @@ var UploadListener = (function (_super) {
         if (task) {
             var info = task.info, transfer_1 = task.transfer;
             this.tasks.removeTask(taskId);
-            function getBody() {
+            var getBody = function () {
                 if (body) {
                     if (contentType.indexOf("application/json") >= 0) {
                         return JSON.parse(body);
@@ -100,7 +100,7 @@ var UploadListener = (function (_super) {
                     }
                 }
                 return null;
-            }
+            };
             task.resolve({
                 info: info,
                 headers: jsHeaders,
@@ -117,7 +117,7 @@ var UploadListener = (function (_super) {
         var task = this.tasks.getTask(taskId);
         if (task) {
             var info = task.info;
-            this.tasks.removeTask(taskId, message);
+            this.tasks.removeTask(taskId);
             task.reject(new conservify_common_1.ConnectionError(message, info));
         }
         else {
@@ -161,7 +161,7 @@ var DownloadListener = (function (_super) {
         if (task) {
             var info = task.info, transfer_2 = task.transfer;
             this.tasks.removeTask(taskId);
-            function getBody() {
+            var getBody = function () {
                 if (body) {
                     if (contentType.indexOf("application/json") >= 0) {
                         return JSON.parse(body);
@@ -174,7 +174,7 @@ var DownloadListener = (function (_super) {
                     }
                 }
                 return null;
-            }
+            };
             task.resolve({
                 info: info,
                 headers: jsHeaders,
@@ -279,19 +279,20 @@ var OpenedFile = (function () {
     };
     return OpenedFile;
 }());
-var NetworkingProto = global.Networking;
-var ServiceDiscoveryProto = global.ServiceDiscovery;
-var WebProto = global.Web;
-var NetworkingListenerProto = global.NetworkingListener;
-var WebTransferListenerProto = global.WebTransferListener;
-var ServiceInfoProto = global.ServiceInfo;
-var WebTransferProto = global.WebTransfer;
-var WifiNetworkProto = global.WifiNetwork;
-var WifiManagerProto = global.WifiManager;
-var FileSystemListenerProto = global.FileSystemListener;
-var FileSystemProto = global.FileSystem;
-var PbFileProto = global.PbFile;
-var SampleDataProto = global.SampleData;
+var globalAny = global;
+var NetworkingProto = globalAny.Networking;
+var ServiceDiscoveryProto = globalAny.ServiceDiscovery;
+var WebProto = globalAny.Web;
+var NetworkingListenerProto = globalAny.NetworkingListener;
+var WebTransferListenerProto = globalAny.WebTransferListener;
+var ServiceInfoProto = globalAny.ServiceInfo;
+var WebTransferProto = globalAny.WebTransfer;
+var WifiNetworkProto = globalAny.WifiNetwork;
+var WifiManagerProto = globalAny.WifiManager;
+var FileSystemListenerProto = globalAny.FileSystemListener;
+var FileSystemProto = globalAny.FileSystem;
+var PbFileProto = globalAny.PbFile;
+var SampleDataProto = globalAny.SampleData;
 var Conservify = (function (_super) {
     __extends(Conservify, _super);
     function Conservify(discoveryEvents, logger) {

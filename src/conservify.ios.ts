@@ -1,4 +1,4 @@
-import { Common, ConnectionError } from "./conservify.common";
+import { Common, ConnectionError, PromiseCallbacks } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -98,7 +98,7 @@ declare class FileSystem extends NSObject {
 
     openWithPath(path: string): PbFile;
 
-    newToken(): String;
+    newToken(): string;
 }
 
 declare class SampleData extends NSObject {
@@ -106,9 +106,9 @@ declare class SampleData extends NSObject {
 
     static new(): SampleData; // inherited from NSObject
 
-    init(): SampleData;
+    // init(): SampleData;
 
-    write(): String;
+    write(): string;
 }
 
 declare class ServiceDiscovery extends NSObject {
@@ -143,8 +143,8 @@ declare class Networking extends NSObject {
 }
 
 interface OtherPromises {
-    getStartedPromise(): Promise;
-    getNetworkStatusPromise(): Promise;
+    getStartedPromise(): PromiseCallbacks;
+    getNetworkStatusPromise(): PromiseCallbacks;
     getDiscoveryEvents(): any;
 }
 
@@ -167,7 +167,7 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
     public onStarted() {
         this.logger("onStarted");
 
-        this.promises.getStartedPromise().resolve();
+        this.promises.getStartedPromise().resolve(null);
     }
 
     public onDiscoveryFailed() {
@@ -219,6 +219,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
     logger: any;
+    tasks: ActiveTasks;
 
     static alloc(): UploadListener {
         return <UploadListener>super.new();
@@ -263,7 +264,7 @@ class UploadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId);
 
-            function getBody() {
+            const getBody = () => {
                 if (body) {
                     if (contentType.indexOf("application/json") >= 0) {
                         return JSON.parse(body);
@@ -275,7 +276,7 @@ class UploadListener extends NSObject implements WebTransferListener {
                     }
                 }
                 return null;
-            }
+            };
 
             task.resolve({
                 info,
@@ -295,7 +296,7 @@ class UploadListener extends NSObject implements WebTransferListener {
         if (task) {
             const { info } = task;
 
-            this.tasks.removeTask(taskId, message);
+            this.tasks.removeTask(taskId);
 
             task.reject(new ConnectionError(message, info));
         } else {
@@ -308,6 +309,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     public static ObjCProtocols = [WebTransferListener];
 
     logger: any;
+    tasks: ActiveTasks;
 
     static alloc(): DownloadListener {
         return <DownloadListener>super.new();
@@ -352,7 +354,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId);
 
-            function getBody() {
+            const getBody = () => {
                 if (body) {
                     if (contentType.indexOf("application/json") >= 0) {
                         return JSON.parse(body);
@@ -364,7 +366,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
                     }
                 }
                 return null;
-            }
+            };
 
             task.resolve({
                 info,
@@ -397,6 +399,7 @@ class MyFileSystemListener extends NSObject implements FileSystemListener {
     public static ObjCProtocols = [FileSystemListener];
 
     logger: any;
+    tasks: ActiveTasks;
 
     static alloc(): MyFileSystemListener {
         return <MyFileSystemListener>super.new();
@@ -482,31 +485,34 @@ class OpenedFile {
     }
 }
 
-const NetworkingProto = global.Networking;
-const ServiceDiscoveryProto = global.ServiceDiscovery;
-const WebProto = global.Web;
-const NetworkingListenerProto = global.NetworkingListener;
-const WebTransferListenerProto = global.WebTransferListener;
-const ServiceInfoProto = global.ServiceInfo;
-const WebTransferProto = global.WebTransfer;
-const WifiNetworkProto = global.WifiNetwork;
-const WifiManagerProto = global.WifiManager;
-const FileSystemListenerProto = global.FileSystemListener;
-const FileSystemProto = global.FileSystem;
-const PbFileProto = global.PbFile;
-const SampleDataProto = global.SampleData;
+const globalAny: any = global;
+const NetworkingProto = globalAny.Networking;
+const ServiceDiscoveryProto = globalAny.ServiceDiscovery;
+const WebProto = globalAny.Web;
+const NetworkingListenerProto = globalAny.NetworkingListener;
+const WebTransferListenerProto = globalAny.WebTransferListener;
+const ServiceInfoProto = globalAny.ServiceInfo;
+const WebTransferProto = globalAny.WebTransfer;
+const WifiNetworkProto = globalAny.WifiNetwork;
+const WifiManagerProto = globalAny.WifiManager;
+const FileSystemListenerProto = globalAny.FileSystemListener;
+const FileSystemProto = globalAny.FileSystem;
+const PbFileProto = globalAny.PbFile;
+const SampleDataProto = globalAny.SampleData;
 
 export class Conservify extends Common implements ActiveTasks, OtherPromises {
     logger: any;
     active: { [key: string]: any };
     networkStatus: any;
     started: any;
+    scan: any;
 
     networking: Networking;
     fileSystem: FileSystem;
     networkingListener: MyNetworkingListener;
     uploadListener: WebTransferListener;
     downloadListener: WebTransferListener;
+    fsListener: MyFileSystemListener;
     discoveryEvents: any;
 
     constructor(discoveryEvents, logger) {
@@ -682,11 +688,11 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         return this.discoveryEvents;
     }
 
-    public getStartedPromise(): Promise<any> {
+    public getStartedPromise(): PromiseCallbacks {
         return this.started;
     }
 
-    public getNetworkStatusPromise(): Promise<any> {
+    public getNetworkStatusPromise(): PromiseCallbacks {
         return this.networkStatus;
     }
 

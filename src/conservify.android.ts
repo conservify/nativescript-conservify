@@ -83,8 +83,8 @@ export class Conservify extends Common {
     networkingListener: org.conservify.networking.NetworkingListener;
     downloadListener: org.conservify.networking.WebTransferListener;
     uploadListener: org.conservify.networking.WebTransferListener;
+    fsListener: org.conservify.data.FileSystemListener;
     networking: org.conservify.networking.Networking;
-    dataListener: org.conservify.data.DataListener;
     fileSystem: org.conservify.data.FileSystem;
 
     constructor(discoveryEvents, logger) {
@@ -135,7 +135,7 @@ export class Conservify extends Common {
                 // owner.logger("onNetworkStatus");
 
                 if (owner.networkStatus) {
-                    function getConnectedWifi() {
+                    const getConnectedWifi = () => {
                         if (status.getConnectedWifi() == null || status.getConnectedWifi().getSsid() == null) {
                             return null;
                         }
@@ -146,9 +146,9 @@ export class Conservify extends Common {
                                 .getSsid()
                                 .replace(/"/g, ""),
                         };
-                    }
+                    };
 
-                    function getWifiNetworks() {
+                    const getWifiNetworks = () => {
                         if (status.getWifiNetworks() == null) {
                             return null;
                         }
@@ -166,7 +166,7 @@ export class Conservify extends Common {
                         }
 
                         return found;
-                    }
+                    };
 
                     const jsObject = {
                         connected: status.getConnected(),
@@ -207,7 +207,7 @@ export class Conservify extends Common {
                 if (task) {
                     const { info, transfer } = task;
 
-                    function getBody() {
+                    const getBody = () => {
                         if (body) {
                             if (contentType.indexOf("application/json") >= 0) {
                                 return JSON.parse(body);
@@ -219,7 +219,7 @@ export class Conservify extends Common {
                             }
                         }
                         return null;
-                    }
+                    };
 
                     delete active[taskId];
 
@@ -275,7 +275,7 @@ export class Conservify extends Common {
                 if (task) {
                     const { info, transfer } = task;
 
-                    function getBody() {
+                    const getBody = () => {
                         if (body) {
                             if (contentType.indexOf("application/json") >= 0) {
                                 return JSON.parse(body);
@@ -287,7 +287,7 @@ export class Conservify extends Common {
                             }
                         }
                         return null;
-                    }
+                    };
 
                     delete active[taskId];
 
