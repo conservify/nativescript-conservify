@@ -141,10 +141,7 @@ export class Conservify extends Common {
                         }
 
                         return {
-                            ssid: status
-                                .getConnectedWifi()
-                                .getSsid()
-                                .replace(/"/g, ""),
+                            ssid: status.getConnectedWifi().getSsid().replace(/"/g, ""),
                         };
                     };
 
@@ -501,6 +498,9 @@ export class Conservify extends Common {
     }
 
     public findConnectedNetwork() {
+        if (!this.networking) {
+            return Promise.reject(new Error("networking uninitialized"));
+        }
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
@@ -512,6 +512,9 @@ export class Conservify extends Common {
     }
 
     public scanNetworks() {
+        if (!this.networking) {
+            return Promise.reject(new Error("networking uninitialized"));
+        }
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,

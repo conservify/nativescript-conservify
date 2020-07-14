@@ -93,10 +93,7 @@ var Conservify = (function (_super) {
                             return null;
                         }
                         return {
-                            ssid: status
-                                .getConnectedWifi()
-                                .getSsid()
-                                .replace(/"/g, ""),
+                            ssid: status.getConnectedWifi().getSsid().replace(/"/g, ""),
                         };
                     };
                     var getWifiNetworks = function () {
@@ -402,6 +399,9 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.findConnectedNetwork = function () {
         var _this = this;
+        if (!this.networking) {
+            return Promise.reject(new Error("networking uninitialized"));
+        }
         return new Promise(function (resolve, reject) {
             _this.networkStatus = {
                 resolve: resolve,
@@ -412,6 +412,9 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.scanNetworks = function () {
         var _this = this;
+        if (!this.networking) {
+            return Promise.reject(new Error("networking uninitialized"));
+        }
         return new Promise(function (resolve, reject) {
             _this.networkStatus = {
                 resolve: resolve,
