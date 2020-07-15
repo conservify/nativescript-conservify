@@ -387,6 +387,13 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setBody(info.body);
 
+        if (info.connectionTimeout) {
+            transfer.setConnectionTimeout(info.connectionTimeout);
+        }
+        if (info.defaultTimeout) {
+            transfer.setDefaultTimeout(info.defaultTimeout);
+        }
+
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
         }
@@ -409,6 +416,13 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setBody(info.body);
 
+        if (info.connectionTimeout) {
+            transfer.setConnectionTimeout(info.connectionTimeout);
+        }
+        if (info.defaultTimeout) {
+            transfer.setDefaultTimeout(info.defaultTimeout);
+        }
+
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
         }
@@ -430,6 +444,13 @@ export class Conservify extends Common {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setBase64EncodeResponseBody(true);
+
+        if (info.connectionTimeout) {
+            transfer.setConnectionTimeout(info.connectionTimeout);
+        }
+        if (info.defaultTimeout) {
+            transfer.setDefaultTimeout(info.defaultTimeout);
+        }
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
@@ -459,6 +480,13 @@ export class Conservify extends Common {
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
 
+        if (info.connectionTimeout) {
+            transfer.setConnectionTimeout(info.connectionTimeout);
+        }
+        if (info.defaultTimeout) {
+            transfer.setDefaultTimeout(info.defaultTimeout);
+        }
+
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
         }
@@ -480,6 +508,13 @@ export class Conservify extends Common {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
+
+        if (info.connectionTimeout) {
+            transfer.setConnectionTimeout(info.connectionTimeout);
+        }
+        if (info.defaultTimeout) {
+            transfer.setDefaultTimeout(info.defaultTimeout);
+        }
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);

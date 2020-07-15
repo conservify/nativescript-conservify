@@ -48,6 +48,12 @@ declare namespace org {
                 setBase64DecodeRequestBody(value: boolean);
                 setBase64EncodeResponseBody(value: boolean);
 
+                setConnectionTimeout(timeout: number);
+                getConnectionTimeout(): number;
+
+                setDefaultTimeout(timeout: number);
+                getDefaultTimeout(): number;
+
                 header(key: string, value: string): WebTransfer;
             }
 
