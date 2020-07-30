@@ -290,10 +290,14 @@ var Conservify = (function (_super) {
         return Promise.resolve(sampleData.write());
     };
     Conservify.prototype.open = function (path) {
+        if (!this.fileSystem)
+            throw new Error("use before initialize");
         return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     };
     Conservify.prototype.text = function (info) {
         var _this = this;
+        if (!this.networking)
+            throw new Error("use before initialize");
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -320,6 +324,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.json = function (info) {
         var _this = this;
+        if (!this.networking)
+            throw new Error("use before initialize");
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -346,6 +352,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.protobuf = function (info) {
         var _this = this;
+        if (!this.networking)
+            throw new Error("use before initialize");
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -377,6 +385,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.download = function (info) {
         var _this = this;
+        if (!this.networking)
+            throw new Error("use before initialize");
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -403,6 +413,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.upload = function (info) {
         var _this = this;
+        if (!this.networking)
+            throw new Error("use before initialize");
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -429,9 +441,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.findConnectedNetwork = function () {
         var _this = this;
-        if (!this.networking) {
-            return Promise.reject(new Error("networking uninitialized"));
-        }
+        if (!this.networking)
+            throw new Error("use before initialize");
         return new Promise(function (resolve, reject) {
             _this.networkStatus = {
                 resolve: resolve,
@@ -442,9 +453,8 @@ var Conservify = (function (_super) {
     };
     Conservify.prototype.scanNetworks = function () {
         var _this = this;
-        if (!this.networking) {
-            return Promise.reject(new Error("networking uninitialized"));
-        }
+        if (!this.networking)
+            throw new Error("use before initialize");
         return new Promise(function (resolve, reject) {
             _this.networkStatus = {
                 resolve: resolve,

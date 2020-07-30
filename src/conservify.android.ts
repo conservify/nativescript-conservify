@@ -378,10 +378,14 @@ export class Conservify extends Common {
     }
 
     public open(path) {
+        if (!this.fileSystem) throw new Error("use before initialize");
+
         return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     }
 
     public text(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -411,6 +415,8 @@ export class Conservify extends Common {
     }
 
     public json(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -440,6 +446,8 @@ export class Conservify extends Common {
     }
 
     public protobuf(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -475,6 +483,8 @@ export class Conservify extends Common {
     }
 
     public download(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -504,6 +514,8 @@ export class Conservify extends Common {
     }
 
     public upload(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
@@ -533,9 +545,8 @@ export class Conservify extends Common {
     }
 
     public findConnectedNetwork() {
-        if (!this.networking) {
-            return Promise.reject(new Error("networking uninitialized"));
-        }
+        if (!this.networking) throw new Error("use before initialize");
+
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
@@ -547,9 +558,8 @@ export class Conservify extends Common {
     }
 
     public scanNetworks() {
-        if (!this.networking) {
-            return Promise.reject(new Error("networking uninitialized"));
-        }
+        if (!this.networking) throw new Error("use before initialize");
+
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,

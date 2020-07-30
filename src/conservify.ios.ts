@@ -565,10 +565,14 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public open(path) {
+        if (!this.fileSystem) throw new Error("use before initialize");
+
         return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
     }
 
     public json(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
@@ -591,6 +595,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public text(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
@@ -613,6 +619,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public protobuf(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
@@ -641,6 +649,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public download(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
@@ -663,6 +673,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public upload(info) {
+        if (!this.networking) throw new Error("use before initialize");
+
         const transfer = WebTransfer.alloc().init();
         transfer.method = info.method;
         transfer.url = info.url;
@@ -697,6 +709,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public findConnectedNetwork() {
+        if (!this.networking) throw new Error("use before initialize");
+
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
@@ -708,6 +722,8 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     }
 
     public scanNetworks() {
+        if (!this.networking) throw new Error("use before initialize");
+
         return new Promise((resolve, reject) => {
             this.networkStatus = {
                 resolve,
