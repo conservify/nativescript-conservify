@@ -66,6 +66,7 @@ declare namespace org {
 
             export class ServiceDiscovery {
                 start(serviceType: string): void;
+                stop(): void;
             }
 
             export class WifiNetworksManager {
@@ -86,6 +87,7 @@ declare namespace org {
                 getServiceDiscovery(): ServiceDiscovery;
 
                 start(serviceType: string): void;
+                stop(): void;
             }
         }
     }

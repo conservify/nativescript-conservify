@@ -53,17 +53,19 @@ var Conservify = (function (_super) {
         _this.active = {};
         _this.networkStatus = null;
         _this.started = null;
+        _this.stopped = null;
         _this.discoveryEvents = discoveryEvents;
-        return _this;
-    }
-    Conservify.prototype.start = function (serviceType) {
-        var _this = this;
-        this.logger("initialize");
-        var owner = this;
-        var active = this.active;
-        this.networkingListener = new org.conservify.networking.NetworkingListener({
+        var owner = _this;
+        var active = _this.active;
+        if (!application_1.android.context) {
+            throw new Error("No androidApp.context? Are we being called before application.start?");
+        }
+        _this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted: function () {
                 owner.started.resolve();
+            },
+            onStopped: function () {
+                owner.stopped.resolve();
             },
             onDiscoveryFailed: function () {
                 owner.started.reject(new Error("discovery failed"));
@@ -125,7 +127,7 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.uploadListener = new org.conservify.networking.WebTransferListener({
+        _this.uploadListener = new org.conservify.networking.WebTransferListener({
             onProgress: function (taskId, headers, bytes, total) {
                 owner.logger("upload:onProgress", taskId, bytes, total);
                 if (active[taskId]) {
@@ -184,7 +186,7 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.downloadListener = new org.conservify.networking.WebTransferListener({
+        _this.downloadListener = new org.conservify.networking.WebTransferListener({
             onProgress: function (taskId, headers, bytes, total) {
                 owner.logger("download:onProgress", taskId, bytes, total);
                 if (active[taskId]) {
@@ -243,7 +245,7 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.fsListener = new org.conservify.data.FileSystemListener({
+        _this.fsListener = new org.conservify.data.FileSystemListener({
             onFileInfo: function (path, token, info) {
                 owner.logger("fs:onFileInfo", path, token, info);
                 var task = active[token];
@@ -274,15 +276,30 @@ var Conservify = (function (_super) {
                 }
             },
         });
-        this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, this.fsListener);
-        this.networking = new org.conservify.networking.Networking(application_1.android.context, this.networkingListener, this.uploadListener, this.downloadListener);
+        _this.fileSystem = new org.conservify.data.FileSystem(application_1.android.context, _this.fsListener);
+        _this.networking = new org.conservify.networking.Networking(application_1.android.context, _this.networkingListener, _this.uploadListener, _this.downloadListener);
+        return _this;
+    }
+    Conservify.prototype.start = function (serviceType) {
+        var _this = this;
         return new Promise(function (resolve, reject) {
             _this.started = {
                 resolve: resolve,
                 reject: reject,
             };
+            _this.logger("starting...");
             _this.networking.getServiceDiscovery().start(serviceType);
-            owner.logger("starting...");
+        });
+    };
+    Conservify.prototype.stop = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.stopped = {
+                resolve: resolve,
+                reject: reject,
+            };
+            _this.logger("stopping...");
+            _this.networking.getServiceDiscovery().stop();
         });
     };
     Conservify.prototype.writeSampleData = function () {

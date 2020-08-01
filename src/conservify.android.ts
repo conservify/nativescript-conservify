@@ -77,6 +77,7 @@ export class Conservify extends Common {
     active: { [key: string]: any };
     scan: any;
     started: any;
+    stopped: any;
     connected: any;
     networkStatus: any;
 
@@ -93,18 +94,23 @@ export class Conservify extends Common {
         this.active = {};
         this.networkStatus = null;
         this.started = null;
+        this.stopped = null;
         this.discoveryEvents = discoveryEvents;
-    }
-
-    public start(serviceType: string) {
-        this.logger("initialize");
 
         const owner = this;
         const active = this.active;
 
+        if (!androidApp.context) {
+            throw new Error("No androidApp.context? Are we being called before application.start?");
+        }
+
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted() {
                 owner.started.resolve();
+            },
+
+            onStopped() {
+                owner.stopped.resolve();
             },
 
             onDiscoveryFailed() {
@@ -359,16 +365,31 @@ export class Conservify extends Common {
             this.uploadListener,
             this.downloadListener
         );
+    }
 
+    public start(serviceType: string) {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
                 reject,
             };
 
-            this.networking.getServiceDiscovery().start(serviceType);
+            this.logger("starting...");
 
-            owner.logger("starting...");
+            this.networking.getServiceDiscovery().start(serviceType);
+        });
+    }
+
+    public stop() {
+        return new Promise((resolve, reject) => {
+            this.stopped = {
+                resolve,
+                reject,
+            };
+
+            this.logger("stopping...");
+
+            this.networking.getServiceDiscovery().stop();
         });
     }
 

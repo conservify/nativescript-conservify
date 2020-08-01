@@ -2,6 +2,7 @@ import { Common, ConnectionError, PromiseCallbacks } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
+    // onStopped(): void;
     onDiscoveryFailed(): void;
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
@@ -168,6 +169,11 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
         this.logger("onStarted");
 
         this.promises.getStartedPromise().resolve(null);
+    }
+
+    public onStopped() {
+        this.logger("onStopped");
+        // this.promises.getStoppedPromise().resolve(null);
     }
 
     public onDiscoveryFailed() {
@@ -532,7 +538,14 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         delete this.active[id];
     }
 
+    public stop() {
+        console.log("stopped (ignored, ios)");
+    }
+
     public start(serviceType: string) {
+        if (this.started) {
+            return Promise.resolve(true);
+        }
         this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
         this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
         this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
@@ -546,16 +559,14 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
 
         return new Promise((resolve, reject) => {
-            this.logger("initialize, ok");
-
             this.started = {
                 resolve,
                 reject,
             };
 
-            this.networking.serviceDiscovery.startWithServiceType(serviceType);
-
             this.logger("starting...");
+
+            this.networking.serviceDiscovery.startWithServiceType(serviceType);
         });
     }
 
