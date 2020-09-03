@@ -1,5 +1,10 @@
 declare namespace org {
     declare namespace conservify {
+        export class ContextContainer {
+            constructor(androidContext: any | null);
+            getContext(): any;
+        }
+
         declare namespace data {
             export class ReadOptions {
                 setBatchSize(size: number);

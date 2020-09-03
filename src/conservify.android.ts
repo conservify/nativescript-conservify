@@ -100,9 +100,18 @@ export class Conservify extends Common {
         const owner = this;
         const active = this.active;
 
-        if (!androidApp.context) {
-            throw new Error("No androidApp.context? Are we being called before application.start?");
-        }
+        const getAndroidContext = () => {
+            if (!androidApp.context) {
+                const cc = new org.conservify.ContextContainer(null);
+                if (!cc.getContext()) {
+                    throw new Error("No androidApp.context? Are we being called before application.start?");
+                }
+                return cc.getContext();
+            } else {
+                const cc = new org.conservify.ContextContainer(androidApp.context);
+                return cc.getContext();
+            }
+        };
 
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted() {
@@ -357,10 +366,11 @@ export class Conservify extends Common {
             },
         });
 
-        this.fileSystem = new org.conservify.data.FileSystem(androidApp.context, this.fsListener);
+        const androidContext = getAndroidContext();
+        this.fileSystem = new org.conservify.data.FileSystem(androidContext, this.fsListener);
 
         this.networking = new org.conservify.networking.Networking(
-            androidApp.context,
+            androidContext,
             this.networkingListener,
             this.uploadListener,
             this.downloadListener
