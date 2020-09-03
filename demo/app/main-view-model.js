@@ -33,10 +33,7 @@ function createViewModel() {
 
     const conservify = new Conservify(new DiscoveryEvents());
 
-    const where = knownFolders
-        .documents()
-        .getFolder("fk")
-        .getFile("test.bin");
+    const where = knownFolders.documents().getFolder("fk").getFile("test.bin");
 
     console.log("where", where.path);
 
@@ -48,31 +45,31 @@ function createViewModel() {
             console.log("fileSystem", conservify.fileSystem, "opening file");
             return conservify
                 .open("missing-file.fkpb")
-                .then(file => {
+                .then((file) => {
                     console.log("opened file");
                     return file.info().then(
-                        info => {
+                        (info) => {
                             console.log("info", info);
                         },
-                        err => {
+                        (err) => {
                             console.log("error getting info", err);
                         }
                     );
                 })
                 .then(() => {
-                    return conservify.writeSampleData().then(file => {
+                    return conservify.writeSampleData().then((file) => {
                         console.log("sample data", file);
 
                         return conservify.open(file).then(
-                            file => {
+                            (file) => {
                                 console.log("opened file");
                                 return file
                                     .info()
                                     .then(
-                                        info => {
+                                        (info) => {
                                             console.log("info", info);
                                         },
-                                        err => {
+                                        (err) => {
                                             console.log("error getting info", err);
                                         }
                                     )
@@ -100,7 +97,7 @@ function createViewModel() {
                 url: "https://ifconfig.me/all.json",
             });
         })
-        .then(data => {
+        .then((data) => {
             console.log("json", data);
         })
         .then(() => {
@@ -114,10 +111,7 @@ function createViewModel() {
             });
         })
         .then(() => {
-            const f = knownFolders
-                .documents()
-                .getFolder("fk")
-                .getFile("test.bin");
+            const f = knownFolders.documents().getFolder("fk").getFile("test.bin");
             console.log("downloaded", f.path, f.size, "uploading...");
             return conservify.upload({
                 url: "http://192.168.0.100:6060/upload",
@@ -127,7 +121,7 @@ function createViewModel() {
                 },
             });
         })
-        .then(uploaded => {
+        .then((uploaded) => {
             console.log("uploaded", uploaded);
             console.log("protobuf...");
             return conservify
@@ -135,7 +129,7 @@ function createViewModel() {
                     url: "http://192.168.0.100:2380/fk/v1",
                     body: null,
                 })
-                .then(data => {
+                .then((data) => {
                     if (data.body) {
                         console.log("protobuf", data.body.length);
                     } else {
@@ -147,7 +141,7 @@ function createViewModel() {
             console.log("findConnectedNetwork");
             return conservify.findConnectedNetwork();
         })
-        .then(connected => {
+        .then((connected) => {
             if (connected) {
                 console.log("connected", connected.getSsid());
             } else {
@@ -158,14 +152,14 @@ function createViewModel() {
             console.log("scanning");
             return conservify.scanNetworks();
         })
-        .then(networks => {
+        .then((networks) => {
             console.log("networks", networks);
         })
         .then(() => {
             console.log("DONE");
             return {};
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("Error", err);
         });
 
