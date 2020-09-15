@@ -528,6 +528,18 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         this.scan = null;
         this.started = null;
         this.discoveryEvents = discoveryEvents;
+
+        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
+        this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
+        this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
+        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(
+            this.networkingListener,
+            this.uploadListener,
+            this.downloadListener
+        );
+
+        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
+        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
     }
 
     public getTask(id: string): any {
@@ -546,17 +558,6 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
         if (this.started) {
             return Promise.resolve(true);
         }
-        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
-        this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
-        this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
-        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(
-            this.networkingListener,
-            this.uploadListener,
-            this.downloadListener
-        );
-
-        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
-        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
 
         return new Promise((resolve, reject) => {
             this.started = {

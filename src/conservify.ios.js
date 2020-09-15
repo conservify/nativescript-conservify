@@ -305,6 +305,12 @@ var Conservify = (function (_super) {
         _this.scan = null;
         _this.started = null;
         _this.discoveryEvents = discoveryEvents;
+        _this.networkingListener = MyNetworkingListener.alloc().initWithPromises(_this, _this.logger);
+        _this.uploadListener = UploadListener.alloc().initWithTasks(_this, _this.logger);
+        _this.downloadListener = DownloadListener.alloc().initWithTasks(_this, _this.logger);
+        _this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(_this.networkingListener, _this.uploadListener, _this.downloadListener);
+        _this.fsListener = MyFileSystemListener.alloc().initWithTasks(_this, _this.logger);
+        _this.fileSystem = FileSystem.alloc().initWithListener(_this.fsListener);
         return _this;
     }
     Conservify.prototype.getTask = function (id) {
@@ -321,12 +327,6 @@ var Conservify = (function (_super) {
         if (this.started) {
             return Promise.resolve(true);
         }
-        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
-        this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
-        this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
-        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
-        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
-        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
         return new Promise(function (resolve, reject) {
             _this.started = {
                 resolve: resolve,
