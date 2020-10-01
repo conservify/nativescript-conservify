@@ -1,4 +1,4 @@
-import { Common, ConnectionError, FileSystemError } from "./conservify.common";
+import { ConnectionError, FileSystemError } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -71,7 +71,7 @@ class OpenedFile {
     }
 }
 
-export class Conservify extends Common {
+export class Conservify {
     logger: any;
     discoveryEvents: any;
     active: { [key: string]: any };
@@ -89,7 +89,6 @@ export class Conservify extends Common {
     fileSystem: org.conservify.data.FileSystem;
 
     constructor(discoveryEvents, logger) {
-        super();
         this.logger = logger || console.log;
         this.active = {};
         this.networkStatus = null;

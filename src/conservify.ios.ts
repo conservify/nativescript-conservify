@@ -1,4 +1,4 @@
-import { Common, ConnectionError, PromiseCallbacks } from "./conservify.common";
+import { ConnectionError, PromiseCallbacks } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -506,7 +506,7 @@ const FileSystemProto = globalAny.FileSystem;
 const PbFileProto = globalAny.PbFile;
 const SampleDataProto = globalAny.SampleData;
 
-export class Conservify extends Common implements ActiveTasks, OtherPromises {
+export class Conservify implements ActiveTasks, OtherPromises {
     logger: any;
     active: { [key: string]: any };
     networkStatus: any;
@@ -522,7 +522,6 @@ export class Conservify extends Common implements ActiveTasks, OtherPromises {
     discoveryEvents: any;
 
     constructor(discoveryEvents, logger) {
-        super();
         this.logger = logger || console.log;
         this.active = {};
         this.scan = null;

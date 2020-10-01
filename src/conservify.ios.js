@@ -296,22 +296,19 @@ var FileSystemListenerProto = globalAny.FileSystemListener;
 var FileSystemProto = globalAny.FileSystem;
 var PbFileProto = globalAny.PbFile;
 var SampleDataProto = globalAny.SampleData;
-var Conservify = (function (_super) {
-    __extends(Conservify, _super);
+var Conservify = (function () {
     function Conservify(discoveryEvents, logger) {
-        var _this = _super.call(this) || this;
-        _this.logger = logger || console.log;
-        _this.active = {};
-        _this.scan = null;
-        _this.started = null;
-        _this.discoveryEvents = discoveryEvents;
-        _this.networkingListener = MyNetworkingListener.alloc().initWithPromises(_this, _this.logger);
-        _this.uploadListener = UploadListener.alloc().initWithTasks(_this, _this.logger);
-        _this.downloadListener = DownloadListener.alloc().initWithTasks(_this, _this.logger);
-        _this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(_this.networkingListener, _this.uploadListener, _this.downloadListener);
-        _this.fsListener = MyFileSystemListener.alloc().initWithTasks(_this, _this.logger);
-        _this.fileSystem = FileSystem.alloc().initWithListener(_this.fsListener);
-        return _this;
+        this.logger = logger || console.log;
+        this.active = {};
+        this.scan = null;
+        this.started = null;
+        this.discoveryEvents = discoveryEvents;
+        this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
+        this.uploadListener = UploadListener.alloc().initWithTasks(this, this.logger);
+        this.downloadListener = DownloadListener.alloc().initWithTasks(this, this.logger);
+        this.networking = Networking.alloc().initWithNetworkingListenerUploadListenerDownloadListener(this.networkingListener, this.uploadListener, this.downloadListener);
+        this.fsListener = MyFileSystemListener.alloc().initWithTasks(this, this.logger);
+        this.fileSystem = FileSystem.alloc().initWithListener(this.fsListener);
     }
     Conservify.prototype.getTask = function (id) {
         return this.active[id];
@@ -494,6 +491,6 @@ var Conservify = (function (_super) {
         });
     };
     return Conservify;
-}(conservify_common_1.Common));
+}());
 exports.Conservify = Conservify;
 //# sourceMappingURL=conservify.ios.js.map

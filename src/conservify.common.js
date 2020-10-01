@@ -1,14 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var observable_1 = require("tns-core-modules/data/observable");
-var Common = (function (_super) {
-    __extends(Common, _super);
-    function Common() {
-        return _super.call(this) || this;
-    }
-    return Common;
-}(observable_1.Observable));
-exports.Common = Common;
 var FileSystemError = (function (_super) {
     __extends(FileSystemError, _super);
     function FileSystemError(message, path) {
