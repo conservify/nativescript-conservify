@@ -551,6 +551,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
 
     public stop() {
         console.log("stopped (ignored, ios)");
+        return Promise.resolve();
     }
 
     public start(serviceType: string) {
