@@ -1,4 +1,4 @@
-import { ConnectionError, FileSystemError } from "./conservify.common";
+import { ConnectionError, FileSystemError, TransferInfo } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -376,7 +376,7 @@ export class Conservify {
         );
     }
 
-    public start(serviceType: string) {
+    public start(serviceType: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
@@ -389,7 +389,7 @@ export class Conservify {
         });
     }
 
-    public stop() {
+    public stop(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.stopped = {
                 resolve,
@@ -402,18 +402,18 @@ export class Conservify {
         });
     }
 
-    public writeSampleData() {
+    public writeSampleData(): Promise<any> {
         const sampleData = new org.conservify.data.SampleData();
         return Promise.resolve(sampleData.write());
     }
 
-    public open(path) {
+    public open(path: string): Promise<OpenedFile> {
         if (!this.fileSystem) throw new Error("use before initialize");
 
         return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     }
 
-    public text(info) {
+    public text(info: TransferInfo): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -444,7 +444,7 @@ export class Conservify {
         });
     }
 
-    public json(info) {
+    public json(info: TransferInfo): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -475,7 +475,7 @@ export class Conservify {
         });
     }
 
-    public protobuf(info) {
+    public protobuf(info: TransferInfo): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -512,7 +512,7 @@ export class Conservify {
         });
     }
 
-    public download(info) {
+    public download(info: TransferInfo): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -543,7 +543,7 @@ export class Conservify {
         });
     }
 
-    public upload(info) {
+    public upload(info: TransferInfo): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -574,7 +574,7 @@ export class Conservify {
         });
     }
 
-    public findConnectedNetwork() {
+    public findConnectedNetwork(): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         return new Promise((resolve, reject) => {
@@ -587,7 +587,7 @@ export class Conservify {
         });
     }
 
-    public scanNetworks() {
+    public scanNetworks(): Promise<any> {
         if (!this.networking) throw new Error("use before initialize");
 
         return new Promise((resolve, reject) => {

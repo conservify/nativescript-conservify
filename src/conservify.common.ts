@@ -1,22 +1,26 @@
 export class FileSystemError extends Error {
-    readonly path: string;
-
-    constructor(message, path) {
+    constructor(message: string, public readonly path: string) {
         super(message);
-        this.path = path;
     }
 }
 
 export class ConnectionError extends Error {
-    readonly info: string;
-
-    constructor(message, info) {
+    constructor(message: string, public readonly info: string) {
         super(message);
-        this.info = info;
     }
 }
 
 export interface PromiseCallbacks {
     resolve(value: any): void;
     reject(error: Error): void;
+}
+
+export interface TransferInfo {
+    url: string;
+    method?: string;
+    body?: string;
+    path?: string;
+    connectionTimeout?: number;
+    defaultTimeout?: number;
+    headers?: { [index: string]: string };
 }
