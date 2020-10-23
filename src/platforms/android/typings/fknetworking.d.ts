@@ -27,8 +27,17 @@ declare namespace org {
         }
 
         declare namespace networking {
+            export interface ServiceInfo {
+                getName(): string;
+                getType(): string;
+                getAddress(): string;
+                getPort(): number;
+            }
+
             export class NetworkingListener {
                 constructor(members: any);
+
+                onSimpleDiscovery(info: ServiceInfo): void;
             }
 
             export class WebTransferListener {

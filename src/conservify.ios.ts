@@ -7,6 +7,7 @@ interface NetworkingListener {
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
     onNetworkStatusWithStatus(status: NetworkingStatus): void;
+    onSimpleDiscoveryWithService(service: ServiceInfo): void;
 }
 
 declare var NetworkingListener: {
@@ -195,6 +196,17 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
         this.logger("onLostServiceWithService", service.type, service.name);
 
         this.promises.getDiscoveryEvents().onLostService({
+            name: service.name,
+            type: service.type,
+            host: service.host, // Probably missing.
+            port: service.port, // Probably missing.
+        });
+    }
+
+    public onSimpleDiscoveryWithService(service: ServiceInfo): void {
+        this.logger("onSimpleDiscoveryWithService", service.type, service.name);
+
+        this.promises.getDiscoveryEvents().onSimpleDiscovery({
             name: service.name,
             type: service.type,
             host: service.host, // Probably missing.
