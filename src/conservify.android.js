@@ -96,13 +96,11 @@ var Conservify = (function () {
                     port: service.getPort(),
                 });
             },
-            onSimpleDiscovery: function (service) {
-                owner.logger("onSimpleDiscovery", service.getName(), service.getType());
-                owner.discoveryEvents.onSimpleDiscovery({
-                    name: service.getName(),
-                    type: service.getType(),
-                    host: service.getAddress(),
-                    port: service.getPort(),
+            onUdpMessage: function (message) {
+                owner.logger("onUdpMessage", message);
+                owner.discoveryEvents.onUdpMessage({
+                    address: message.getAddress(),
+                    data: message.getData(),
                 });
             },
             onNetworkStatus: function (status) {

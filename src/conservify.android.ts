@@ -15,6 +15,18 @@ function toJsHeaders(headers) {
     return jsHeaders;
 }
 
+interface JavaServiceInfo {
+    getName(): string;
+    getType(): string;
+    getAddress(): string; // Probably missing.
+    getPort(): string; // Probably missing.
+}
+
+interface JavaUdpMessage {
+    getAddress(): string;
+    getData(): string;
+}
+
 class OpenedFile {
     cfy: Conservify;
     fs: any;
@@ -125,7 +137,7 @@ export class Conservify {
                 owner.started.reject(new Error("discovery failed"));
             },
 
-            onFoundService(service: ServiceInfo) {
+            onFoundService(service: JavaServiceInfo) {
                 owner.logger("onFoundService", service.getName(), service.getType(), service.getAddress(), service.getPort());
                 owner.discoveryEvents.onFoundService({
                     name: service.getName(),
@@ -135,7 +147,7 @@ export class Conservify {
                 });
             },
 
-            onLostService(service: ServiceInfo) {
+            onLostService(service: JavaServiceInfo) {
                 owner.logger("onLostService", service.getName(), service.getType());
                 owner.discoveryEvents.onLostService({
                     name: service.getName(),
@@ -145,13 +157,11 @@ export class Conservify {
                 });
             },
 
-            onSimpleDiscovery(service: ServiceInfo) {
-                owner.logger("onSimpleDiscovery", service.getName(), service.getType());
-                owner.discoveryEvents.onSimpleDiscovery({
-                    name: service.getName(),
-                    type: service.getType(),
-                    host: service.getAddress(), // Probably missing.
-                    port: service.getPort(), // Probably missing.
+            onUdpMessage(message: JavaUdpMessage) {
+                owner.logger("onUdpMessage", message);
+                owner.discoveryEvents.onUdpMessage({
+                    address: message.getAddress(),
+                    data: message.getData(),
                 });
             },
 

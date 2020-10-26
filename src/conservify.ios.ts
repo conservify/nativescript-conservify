@@ -7,7 +7,7 @@ interface NetworkingListener {
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
     onNetworkStatusWithStatus(status: NetworkingStatus): void;
-    onSimpleDiscoveryWithService(service: ServiceInfo): void;
+    onUdpMessageWithMessage(message: UdpMessage): void;
 }
 
 declare var NetworkingListener: {
@@ -66,6 +66,11 @@ declare class ServiceInfo extends NSObject {
     public name: string;
     public host: string;
     public port: number;
+}
+
+declare class UdpMessage extends NSObject {
+    public address: string;
+    public data: string;
 }
 
 declare class ReadOptions extends NSObject {
@@ -203,14 +208,12 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
         });
     }
 
-    public onSimpleDiscoveryWithService(service: ServiceInfo): void {
-        this.logger("onSimpleDiscoveryWithService", service.type, service.name);
+    public onUdpMessageWithMessage(message: UdpMessage): void {
+        this.logger("onUdpMessageWithMessage", message);
 
-        this.promises.getDiscoveryEvents().onSimpleDiscovery({
-            name: service.name,
-            type: service.type,
-            host: service.host, // Probably missing.
-            port: service.port, // Probably missing.
+        this.promises.getDiscoveryEvents().onUdpMessage({
+            address: message.address,
+            data: message.data,
         });
     }
 

@@ -42,13 +42,11 @@ var MyNetworkingListener = (function (_super) {
             port: service.port,
         });
     };
-    MyNetworkingListener.prototype.onSimpleDiscoveryWithService = function (service) {
-        this.logger("onSimpleDiscoveryWithService", service.type, service.name);
-        this.promises.getDiscoveryEvents().onSimpleDiscovery({
-            name: service.name,
-            type: service.type,
-            host: service.host,
-            port: service.port,
+    MyNetworkingListener.prototype.onUdpMessageWithMessage = function (message) {
+        this.logger("onUdpMessageWithMessage", message);
+        this.promises.getDiscoveryEvents().onUdpMessage({
+            address: message.address,
+            data: message.data,
         });
     };
     MyNetworkingListener.prototype.onNetworkStatusWithStatus = function (status) {

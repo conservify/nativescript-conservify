@@ -34,10 +34,15 @@ declare namespace org {
                 getPort(): number;
             }
 
+            export interface UdpMessage {
+                getAddress(): string;
+                getData(): string;
+            }
+
             export class NetworkingListener {
                 constructor(members: any);
 
-                onSimpleDiscovery(info: ServiceInfo): void;
+                onUdpMessage(message: UdpMessage): void;
             }
 
             export class WebTransferListener {
