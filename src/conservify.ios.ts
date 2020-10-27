@@ -119,7 +119,11 @@ declare class SampleData extends NSObject {
 }
 
 declare class ServiceDiscovery extends NSObject {
-    startWithServiceType(serviceType: string): void;
+    startWithServiceTypeSearchServiceNameSelfServiceTypeSelf(
+        serviceTypeSearch: string | null,
+        serviceNameSelf: string | null,
+        serviceTypeSelf: string | null
+    ): void;
 }
 
 declare class Web extends NSObject {
@@ -569,7 +573,11 @@ export class Conservify implements ActiveTasks, OtherPromises {
         return Promise.resolve(true);
     }
 
-    public start(serviceType: string): Promise<any> {
+    public start(
+        serviceTypeSearch: string | null = null,
+        serviceNameSelf: string | null = null,
+        serviceTypeSelf: string | null = null
+    ): Promise<any> {
         if (this.started) {
             return Promise.resolve(true);
         }
@@ -580,9 +588,13 @@ export class Conservify implements ActiveTasks, OtherPromises {
                 reject,
             };
 
-            this.logger("starting...");
+            this.logger("starting:", serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
 
-            this.networking.serviceDiscovery.startWithServiceType(serviceType);
+            this.networking.serviceDiscovery.startWithServiceTypeSearchServiceNameSelfServiceTypeSelf(
+                serviceTypeSearch,
+                serviceNameSelf,
+                serviceTypeSelf
+            );
         });
     }
 

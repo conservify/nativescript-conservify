@@ -396,16 +396,20 @@ export class Conservify {
         );
     }
 
-    public start(serviceType: string): Promise<any> {
+    public start(
+        serviceTypeSearch: string | null = null,
+        serviceNameSelf: string | null = null,
+        serviceTypeSelf: string | null = null
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
                 reject,
             };
 
-            this.logger("starting...");
+            this.logger("starting:", serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
 
-            this.networking.getServiceDiscovery().start(serviceType);
+            this.networking.getServiceDiscovery().start(serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
         });
     }
 

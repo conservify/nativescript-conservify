@@ -84,7 +84,11 @@ declare namespace org {
             }
 
             export class ServiceDiscovery {
-                start(serviceType: string): void;
+                start(
+                    serviceTypeSearch: string | null = null,
+                    serviceNameSelf: string | null = null,
+                    serviceTypeSelf: string | null = null
+                ): void;
                 stop(): void;
             }
 
