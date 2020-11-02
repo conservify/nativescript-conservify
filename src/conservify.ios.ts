@@ -1,4 +1,4 @@
-import { ConnectionError, PromiseCallbacks, TransferInfo } from "./conservify.common";
+import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -568,9 +568,9 @@ export class Conservify implements ActiveTasks, OtherPromises {
         delete this.active[id];
     }
 
-    public stop(): Promise<any> {
+    public stop(): Promise<void> {
         console.log("stopped (ignored, ios)");
-        return Promise.resolve(true);
+        return Promise.resolve();
     }
 
     public start(
@@ -598,7 +598,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public writeSampleData(): Promise<any> {
+    public writeSampleData(): Promise<void> {
         const sampleData: SampleData = SampleData.alloc().init();
         return Promise.resolve(sampleData.write());
     }
@@ -609,7 +609,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
     }
 
-    public json(info: TransferInfo): Promise<any> {
+    public json(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = WebTransfer.alloc().init();
@@ -633,7 +633,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public text(info: TransferInfo): Promise<any> {
+    public text(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = WebTransfer.alloc().init();
@@ -657,7 +657,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public protobuf(info: TransferInfo): Promise<any> {
+    public protobuf(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = WebTransfer.alloc().init();
@@ -687,7 +687,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public download(info: TransferInfo): Promise<any> {
+    public download(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = WebTransfer.alloc().init();
@@ -711,7 +711,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public upload(info: TransferInfo): Promise<any> {
+    public upload(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = WebTransfer.alloc().init();

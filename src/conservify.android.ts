@@ -1,4 +1,4 @@
-import { ConnectionError, FileSystemError, TransferInfo } from "./conservify.common";
+import { ConnectionError, FileSystemError, TransferInfo, HttpResponse } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -400,7 +400,7 @@ export class Conservify {
         serviceTypeSearch: string | null = null,
         serviceNameSelf: string | null = null,
         serviceTypeSelf: string | null = null
-    ): Promise<any> {
+    ): Promise<void> {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
@@ -413,7 +413,7 @@ export class Conservify {
         });
     }
 
-    public stop(): Promise<any> {
+    public stop(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.stopped = {
                 resolve,
@@ -426,7 +426,7 @@ export class Conservify {
         });
     }
 
-    public writeSampleData(): Promise<any> {
+    public writeSampleData(): Promise<void> {
         const sampleData = new org.conservify.data.SampleData();
         return Promise.resolve(sampleData.write());
     }
@@ -437,7 +437,7 @@ export class Conservify {
         return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     }
 
-    public text(info: TransferInfo): Promise<any> {
+    public text(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -468,7 +468,7 @@ export class Conservify {
         });
     }
 
-    public json(info: TransferInfo): Promise<any> {
+    public json(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -499,7 +499,7 @@ export class Conservify {
         });
     }
 
-    public protobuf(info: TransferInfo): Promise<any> {
+    public protobuf(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -536,7 +536,7 @@ export class Conservify {
         });
     }
 
-    public download(info: TransferInfo): Promise<any> {
+    public download(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
@@ -567,7 +567,7 @@ export class Conservify {
         });
     }
 
-    public upload(info: TransferInfo): Promise<any> {
+    public upload(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 
         const transfer = new org.conservify.networking.WebTransfer();
