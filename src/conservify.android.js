@@ -321,8 +321,19 @@ var Conservify = (function () {
         });
     };
     Conservify.prototype.writeSampleData = function () {
-        var sampleData = new org.conservify.data.SampleData();
-        return Promise.resolve(sampleData.write());
+        return __awaiter(this, void 0, void 0, function () {
+            var sampleData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        sampleData = new org.conservify.data.SampleData();
+                        return [4, sampleData.write()];
+                    case 1:
+                        _a.sent();
+                        return [2];
+                }
+            });
+        });
     };
     Conservify.prototype.open = function (path) {
         if (!this.fileSystem)
@@ -336,7 +347,7 @@ var Conservify = (function () {
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(info.body);
+        transfer.setBody(conservify_common_1.encodeBody(info.body));
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
         }
@@ -364,7 +375,7 @@ var Conservify = (function () {
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(info.body);
+        transfer.setBody(conservify_common_1.encodeBody(info.body));
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
         }
@@ -404,8 +415,7 @@ var Conservify = (function () {
             transfer.header(key, value);
         }
         if (info.body) {
-            var requestBody = Buffer.from(info.body).toString("base64");
-            transfer.setBody(requestBody);
+            transfer.setBody(conservify_common_1.encodeBody(info.body));
             transfer.setBase64DecodeRequestBody(true);
         }
         return new Promise(function (resolve, reject) {

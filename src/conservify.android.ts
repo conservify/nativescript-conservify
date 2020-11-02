@@ -1,4 +1,4 @@
-import { ConnectionError, FileSystemError, TransferInfo, HttpResponse } from "./conservify.common";
+import { ConnectionError, FileSystemError, TransferInfo, HttpResponse, encodeBody } from "./conservify.common";
 
 import * as applicationModule from "tns-core-modules/application";
 import { android as androidApp } from "tns-core-modules/application";
@@ -426,9 +426,9 @@ export class Conservify {
         });
     }
 
-    public writeSampleData(): Promise<void> {
+    public async writeSampleData(): Promise<void> {
         const sampleData = new org.conservify.data.SampleData();
-        return Promise.resolve(sampleData.write());
+        await sampleData.write();
     }
 
     public open(path: string): Promise<OpenedFile> {
@@ -443,7 +443,7 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(info.body);
+        transfer.setBody(encodeBody(info.body));
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -474,7 +474,7 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(info.body);
+        transfer.setBody(encodeBody(info.body));
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -519,8 +519,7 @@ export class Conservify {
         }
 
         if (info.body) {
-            const requestBody = Buffer.from(info.body).toString("base64");
-            transfer.setBody(requestBody);
+            transfer.setBody(encodeBody(info.body));
             transfer.setBase64DecodeRequestBody(true);
         }
 

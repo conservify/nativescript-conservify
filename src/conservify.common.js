@@ -20,4 +20,11 @@ var ConnectionError = (function (_super) {
     return ConnectionError;
 }(Error));
 exports.ConnectionError = ConnectionError;
+function encodeBody(body) {
+    if (Buffer.isBuffer(body)) {
+        return body.toString("base64");
+    }
+    return Buffer.from(body).toString("base64");
+}
+exports.encodeBody = encodeBody;
 //# sourceMappingURL=conservify.common.js.map

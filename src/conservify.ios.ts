@@ -1,4 +1,4 @@
-import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse } from "./conservify.common";
+import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBody } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -598,9 +598,10 @@ export class Conservify implements ActiveTasks, OtherPromises {
         });
     }
 
-    public writeSampleData(): Promise<void> {
+    public async writeSampleData(): Promise<void> {
         const sampleData: SampleData = SampleData.alloc().init();
-        return Promise.resolve(sampleData.write());
+        await sampleData.write();
+        return Promise.resolve();
     }
 
     public open(path: string): Promise<OpenedFile> {
@@ -670,8 +671,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         }
 
         if (info.body) {
-            const requestBody = Buffer.from(info.body).toString("base64");
-            transfer.body = requestBody;
+            transfer.body = encodeBody(info.body);
             transfer.base64DecodeRequestBody = true;
         }
 

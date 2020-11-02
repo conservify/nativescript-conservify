@@ -18,7 +18,7 @@ export interface PromiseCallbacks {
 export interface TransferInfo {
     url: string;
     method?: string;
-    body?: string;
+    body?: string | Uint8Array;
     path?: string;
     connectionTimeout?: number;
     defaultTimeout?: number;
@@ -29,4 +29,11 @@ export interface HttpResponse {
     statusCode: number;
     headers: { [index: string]: string };
     body: string;
+}
+
+export function encodeBody(body: Uint8Array | string): string {
+    if (Buffer.isBuffer(body)) {
+        return body.toString("base64");
+    }
+    return Buffer.from(body as string).toString("base64");
 }
