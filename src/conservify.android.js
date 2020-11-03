@@ -347,7 +347,6 @@ var Conservify = (function () {
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(conservify_common_1.encodeBody(info.body));
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
         }
@@ -357,6 +356,14 @@ var Conservify = (function () {
         for (var _i = 0, _a = Object.entries(info.headers || {}); _i < _a.length; _i++) {
             var _b = _a[_i], key = _b[0], value = _b[1];
             transfer.header(key, value);
+        }
+        if (info.body) {
+            if (ArrayBuffer.isView(info.body)) {
+                throw new Error("unsupported");
+            }
+            else {
+                transfer.setBody(info.body);
+            }
         }
         return new Promise(function (resolve, reject) {
             _this.active[transfer.getId()] = {
@@ -375,7 +382,6 @@ var Conservify = (function () {
         var transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(conservify_common_1.encodeBody(info.body));
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
         }
@@ -385,6 +391,14 @@ var Conservify = (function () {
         for (var _i = 0, _a = Object.entries(info.headers || {}); _i < _a.length; _i++) {
             var _b = _a[_i], key = _b[0], value = _b[1];
             transfer.header(key, value);
+        }
+        if (info.body) {
+            if (ArrayBuffer.isView(info.body)) {
+                throw new Error("unsupported");
+            }
+            else {
+                transfer.setBody(info.body);
+            }
         }
         return new Promise(function (resolve, reject) {
             _this.active[transfer.getId()] = {

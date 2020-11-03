@@ -443,7 +443,6 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(encodeBody(info.body));
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -451,9 +450,15 @@ export class Conservify {
         if (info.defaultTimeout) {
             transfer.setDefaultTimeout(info.defaultTimeout);
         }
-
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
+        }
+        if (info.body) {
+            if (ArrayBuffer.isView(info.body)) {
+                throw new Error("unsupported");
+            } else {
+                transfer.setBody(info.body);
+            }
         }
 
         return new Promise((resolve, reject) => {
@@ -474,7 +479,6 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
-        transfer.setBody(encodeBody(info.body));
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -485,6 +489,13 @@ export class Conservify {
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.header(key, value as string);
+        }
+        if (info.body) {
+            if (ArrayBuffer.isView(info.body)) {
+                throw new Error("unsupported");
+            } else {
+                transfer.setBody(info.body);
+            }
         }
 
         return new Promise((resolve, reject) => {
