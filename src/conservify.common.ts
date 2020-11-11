@@ -20,7 +20,7 @@ export interface TransferInfo {
     method?: string;
     body?: Uint8Array | string;
     path?: string;
-	copy?: boolean;
+    uploadCopy?: boolean;
     connectionTimeout?: number;
     defaultTimeout?: number;
     headers?: { [index: string]: string };

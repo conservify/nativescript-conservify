@@ -55,6 +55,7 @@ declare class WebTransfer extends NSObject {
     public url: string;
     public path: string;
     public body: any;
+    public uploadCopy: boolean;
     public base64EncodeResponseBody: boolean;
     public base64DecodeRequestBody: boolean;
 
@@ -718,7 +719,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
-		transfer.copy = info.copy;
+        transfer.uploadCopy = info.uploadCopy;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);

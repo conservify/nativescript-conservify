@@ -61,6 +61,9 @@ declare namespace org {
                 setPath(url: string);
                 getPath(): string;
 
+                setUploadCopy(uploadCopy: boolean);
+                isUploadCopy(): boolean;
+
                 setBody(body: string);
                 getBody(): string;
 

@@ -478,7 +478,7 @@ var Conservify = (function () {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
-        transfer.setCopy(info.copy);
+        transfer.setUploadCopy(info.uploadCopy);
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
         }
