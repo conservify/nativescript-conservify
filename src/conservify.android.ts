@@ -584,6 +584,7 @@ export class Conservify {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
+		transfer.setCopy(info.copy);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);

@@ -18,8 +18,9 @@ export interface PromiseCallbacks {
 export interface TransferInfo {
     url: string;
     method?: string;
-    body?: string | Uint8Array;
+    body?: Uint8Array | string;
     path?: string;
+	copy?: boolean;
     connectionTimeout?: number;
     defaultTimeout?: number;
     headers?: { [index: string]: string };

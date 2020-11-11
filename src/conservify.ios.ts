@@ -718,6 +718,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
+		transfer.copy = info.copy;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);
