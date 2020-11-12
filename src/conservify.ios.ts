@@ -105,6 +105,7 @@ declare class FileSystem extends NSObject {
     initWithListener(listener: FileSystemListener): FileSystem;
 
     openWithPath(path: string): PbFile;
+    copyFileWithSourceDestiny(source: string, destiny: string): boolean;
 
     newToken(): string;
 }
@@ -609,6 +610,12 @@ export class Conservify implements ActiveTasks, OtherPromises {
         if (!this.fileSystem) throw new Error("use before initialize");
 
         return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
+    }
+
+    public copyFile(source: string, destiny: string): Promise<boolean> {
+        if (!this.fileSystem) throw new Error("use before initialize");
+
+        return Promise.resolve(this.fileSystem.copyFileWithSourceDestiny(source, destiny));
     }
 
     public json(info: TransferInfo): Promise<HttpResponse> {

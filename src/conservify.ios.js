@@ -364,6 +364,11 @@ var Conservify = (function () {
             throw new Error("use before initialize");
         return Promise.resolve(new OpenedFile(this, this.fileSystem.openWithPath(path)));
     };
+    Conservify.prototype.copyFile = function (source, destiny) {
+        if (!this.fileSystem)
+            throw new Error("use before initialize");
+        return Promise.resolve(this.fileSystem.copyFileWithSourceDestiny(source, destiny));
+    };
     Conservify.prototype.json = function (info) {
         var _this = this;
         if (!this.networking)
