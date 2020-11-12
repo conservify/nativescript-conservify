@@ -437,6 +437,12 @@ export class Conservify {
         return Promise.resolve(new OpenedFile(this, this.fileSystem.open(path)));
     }
 
+    public copyFile(source: string, destiny: string): Promise<boolean> {
+        if (!this.fileSystem) throw new Error("use before initialize");
+
+        return Promise.resolve(this.fileSystem.copyFile(source, destiny));
+    }
+
     public text(info: TransferInfo): Promise<HttpResponse> {
         if (!this.networking) throw new Error("use before initialize");
 

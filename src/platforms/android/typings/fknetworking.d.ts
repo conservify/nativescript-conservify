@@ -15,6 +15,8 @@ declare namespace org {
                 constructor(androidContext: any, fileSystemListener: FileSystemListener);
 
                 open(path: string): any;
+
+		copyFile(source: string, destiny: string): boolean;
             }
 
             export class FileSystemListener {
