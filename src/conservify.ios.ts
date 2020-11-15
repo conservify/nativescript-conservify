@@ -2,7 +2,7 @@ import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBo
 
 interface NetworkingListener {
     onStarted(): void;
-    // onStopped(): void;
+    onStopped(): void;
     onDiscoveryFailed(): void;
     onFoundServiceWithService(service: ServiceInfo): void;
     onLostServiceWithService(service: ServiceInfo): void;
@@ -126,6 +126,7 @@ declare class ServiceDiscovery extends NSObject {
         serviceNameSelf: string | null,
         serviceTypeSelf: string | null
     ): void;
+    stop(): void;
 }
 
 declare class Web extends NSObject {
@@ -157,6 +158,7 @@ declare class Networking extends NSObject {
 
 interface OtherPromises {
     getStartedPromise(): PromiseCallbacks;
+    getStoppedPromise(): PromiseCallbacks;
     getNetworkStatusPromise(): PromiseCallbacks;
     getDiscoveryEvents(): any;
 }
@@ -185,7 +187,8 @@ class MyNetworkingListener extends NSObject implements NetworkingListener {
 
     public onStopped() {
         this.logger("onStopped");
-        // this.promises.getStoppedPromise().resolve(null);
+
+        this.promises.getStoppedPromise().resolve(null);
     }
 
     public onDiscoveryFailed() {
@@ -474,9 +477,9 @@ class MyFileSystemListener extends NSObject implements FileSystemListener {
 }
 
 class OpenedFile {
-    cfy: Conservify;
-    fs: FileSystem;
-    file: PbFile;
+    private cfy: Conservify;
+    private fs: FileSystem;
+    private file: PbFile;
 
     public constructor(cfy: Conservify, file: PbFile) {
         this.cfy = cfy;
@@ -528,25 +531,27 @@ const PbFileProto = globalAny.PbFile;
 const SampleDataProto = globalAny.SampleData;
 
 export class Conservify implements ActiveTasks, OtherPromises {
-    logger: any;
+    private logger: any;
     active: { [key: string]: any };
-    networkStatus: any;
-    started: any;
-    scan: any;
+    private networkStatus: any;
+    private started: any;
+    private stopped: any;
+    private scan: any;
 
-    networking: Networking;
+    private networking: Networking;
     fileSystem: FileSystem;
-    networkingListener: MyNetworkingListener;
-    uploadListener: WebTransferListener;
-    downloadListener: WebTransferListener;
-    fsListener: MyFileSystemListener;
-    discoveryEvents: any;
+    private networkingListener: MyNetworkingListener;
+    private uploadListener: WebTransferListener;
+    private downloadListener: WebTransferListener;
+    private fsListener: MyFileSystemListener;
+    private discoveryEvents: any;
 
     constructor(discoveryEvents, logger) {
         this.logger = logger || console.log;
         this.active = {};
         this.scan = null;
         this.started = null;
+        this.stopped = null;
         this.discoveryEvents = discoveryEvents;
 
         this.networkingListener = MyNetworkingListener.alloc().initWithPromises(this, this.logger);
@@ -571,8 +576,22 @@ export class Conservify implements ActiveTasks, OtherPromises {
     }
 
     public stop(): Promise<void> {
-        console.log("stopped (ignored, ios)");
-        return Promise.resolve();
+        if (this.stopped) {
+            return Promise.resolve();
+        }
+
+        this.started = null;
+
+        return new Promise((resolve, reject) => {
+            this.stopped = {
+                resolve,
+                reject,
+            };
+
+            this.logger("stopping:");
+
+            this.networking.serviceDiscovery.stop();
+        });
     }
 
     public start(
@@ -583,6 +602,8 @@ export class Conservify implements ActiveTasks, OtherPromises {
         if (this.started) {
             return Promise.resolve(true);
         }
+
+        this.stopped = null;
 
         return new Promise((resolve, reject) => {
             this.started = {
@@ -750,6 +771,10 @@ export class Conservify implements ActiveTasks, OtherPromises {
 
     public getStartedPromise(): PromiseCallbacks {
         return this.started;
+    }
+
+    public getStoppedPromise(): PromiseCallbacks {
+        return this.stopped;
     }
 
     public getNetworkStatusPromise(): PromiseCallbacks {
