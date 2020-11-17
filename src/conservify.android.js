@@ -70,9 +70,11 @@ var Conservify = (function () {
         };
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted: function () {
+                owner.logger("onStarted");
                 owner.started.resolve();
             },
             onStopped: function () {
+                owner.logger("onStopped");
                 owner.stopped.resolve();
             },
             onDiscoveryFailed: function () {

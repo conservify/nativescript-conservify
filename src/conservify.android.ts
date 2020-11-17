@@ -126,10 +126,12 @@ export class Conservify {
 
         this.networkingListener = new org.conservify.networking.NetworkingListener({
             onStarted() {
+                owner.logger("onStarted");
                 owner.started.resolve();
             },
 
             onStopped() {
+                owner.logger("onStopped");
                 owner.stopped.resolve();
             },
 
