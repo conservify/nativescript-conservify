@@ -16,7 +16,7 @@ declare namespace org {
 
                 open(path: string): any;
 
-		copyFile(source: string, destiny: string): boolean;
+                copyFile(source: string, destiny: string): boolean;
             }
 
             export class FileSystemListener {
@@ -81,6 +81,20 @@ declare namespace org {
                 header(key: string, value: string): WebTransfer;
             }
 
+            export class StartOptions {
+                getServiceTypeSearch(): string;
+                setServiceTypeSearch(serviceTypeSearch: string): void;
+                getServiceNameSelf(): string;
+                setServiceNameSelf(serviceNameSelf: string): void;
+                getServiceTypeSelf(): string;
+                setServiceTypeSelf(serviceTypeSelf: string): void;
+            }
+
+            export class StopOptions {
+                isSuspending(): boolean;
+                setSuspending(suspending: boolean): void;
+            }
+
             export class Web {
                 json(info: WebTransfer): string;
                 binary(info: WebTransfer): string;
@@ -89,12 +103,8 @@ declare namespace org {
             }
 
             export class ServiceDiscovery {
-                start(
-                    serviceTypeSearch: string | null = null,
-                    serviceNameSelf: string | null = null,
-                    serviceTypeSelf: string | null = null
-                ): void;
-                stop(): void;
+                start(options: StartOptions): void;
+                stop(options: StopOptions): void;
             }
 
             export class WifiNetworksManager {

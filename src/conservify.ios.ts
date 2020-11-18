@@ -1,4 +1,4 @@
-import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBody } from "./conservify.common";
+import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
 
 interface NetworkingListener {
     onStarted(): void;
@@ -115,18 +115,30 @@ declare class SampleData extends NSObject {
 
     static new(): SampleData; // inherited from NSObject
 
-    // init(): SampleData;
-
     write(): string;
 }
 
+declare class DiscoveryStartOptions extends NSObject {
+    static alloc(): DiscoveryStartOptions; // inherited from NSObject
+
+    static new(): DiscoveryStartOptions; // inherited from NSObject
+
+    public serviceTypeSearch: string | null;
+    public serviceNameSelf: string | null;
+    public serviceTypeSelf: string | null;
+}
+
+declare class DiscoveryStopOptions extends NSObject {
+    static alloc(): DiscoveryStopOptions; // inherited from NSObject
+
+    static new(): DiscoveryStopOptions; // inherited from NSObject
+
+    public suspending: boolean;
+}
+
 declare class ServiceDiscovery extends NSObject {
-    startWithServiceTypeSearchServiceNameSelfServiceTypeSelf(
-        serviceTypeSearch: string | null,
-        serviceNameSelf: string | null,
-        serviceTypeSelf: string | null
-    ): void;
-    stop(): void;
+    startWithOptions(options: DiscoveryStartOptions): void;
+    stopWithOptions(options: DiscoveryStopOptions): void;
 }
 
 declare class Web extends NSObject {
@@ -575,49 +587,37 @@ export class Conservify implements ActiveTasks, OtherPromises {
         delete this.active[id];
     }
 
-    public stop(): Promise<void> {
-        if (this.stopped) {
-            return Promise.resolve();
-        }
-
-        this.started = null;
-
-        return new Promise((resolve, reject) => {
-            this.stopped = {
-                resolve,
-                reject,
-            };
-
-            this.logger("stopping:");
-
-            this.networking.serviceDiscovery.stop();
-        });
-    }
-
-    public start(
-        serviceTypeSearch: string | null = null,
-        serviceNameSelf: string | null = null,
-        serviceTypeSelf: string | null = null
-    ): Promise<any> {
-        if (this.started) {
-            return Promise.resolve(true);
-        }
-
-        this.stopped = null;
-
+    public start(options: StartOptions): Promise<any> {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
                 reject,
             };
 
-            this.logger("starting:", serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
+            const iosOptions = DiscoveryStartOptions.alloc().init();
+            iosOptions.serviceTypeSearch = options.serviceTypeSearch;
+            iosOptions.serviceNameSelf = options.serviceNameSelf;
+            iosOptions.serviceTypeSelf = options.serviceTypeSelf;
 
-            this.networking.serviceDiscovery.startWithServiceTypeSearchServiceNameSelfServiceTypeSelf(
-                serviceTypeSearch,
-                serviceNameSelf,
-                serviceTypeSelf
-            );
+            this.logger("starting:", JSON.stringify(iosOptions), JSON.stringify(options));
+
+            this.networking.serviceDiscovery.startWithOptions(iosOptions);
+        });
+    }
+
+    public stop(options: StopOptions): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.stopped = {
+                resolve,
+                reject,
+            };
+
+            const iosOptions = DiscoveryStopOptions.alloc().init();
+            iosOptions.suspending = options.suspending;
+
+            this.logger("stopping:", JSON.stringify(iosOptions), JSON.stringify(options));
+
+            this.networking.serviceDiscovery.stopWithOptions(iosOptions);
         });
     }
 

@@ -1,8 +1,5 @@
-import { ConnectionError, FileSystemError, TransferInfo, HttpResponse, encodeBody } from "./conservify.common";
-
-import * as applicationModule from "tns-core-modules/application";
+import { ConnectionError, FileSystemError, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
 import { android as androidApp } from "tns-core-modules/application";
-import { Folder, path, File, knownFolders } from "tns-core-modules/file-system";
 
 function toJsHeaders(headers) {
     const jsHeaders = {};
@@ -398,33 +395,37 @@ export class Conservify {
         );
     }
 
-    public start(
-        serviceTypeSearch: string | null = null,
-        serviceNameSelf: string | null = null,
-        serviceTypeSelf: string | null = null
-    ): Promise<void> {
+    public start(options: StartOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             this.started = {
                 resolve,
                 reject,
             };
 
-            this.logger("starting:", serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
+            const javaOptions = new org.conservify.networking.StartOptions();
+            javaOptions.setServiceTypeSearch(options.serviceTypeSearch);
+            javaOptions.setServiceNameSelf(options.serviceNameSelf);
+            javaOptions.setServiceTypeSelf(options.serviceTypeSelf);
 
-            this.networking.getServiceDiscovery().start(serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
+            this.logger("starting:", JSON.stringify(javaOptions), JSON.stringify(options));
+
+            this.networking.getServiceDiscovery().start(javaOptions);
         });
     }
 
-    public stop(): Promise<void> {
+    public stop(options: StopOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             this.stopped = {
                 resolve,
                 reject,
             };
 
-            this.logger("stopping...");
+            const javaOptions = new org.conservify.networking.StopOptions();
+            javaOptions.setSuspending(options.suspending);
 
-            this.networking.getServiceDiscovery().stop();
+            this.logger("stopping:", JSON.stringify(javaOptions), JSON.stringify(options));
+
+            this.networking.getServiceDiscovery().stop(javaOptions);
         });
     }
 

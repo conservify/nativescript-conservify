@@ -38,3 +38,13 @@ export function encodeBody(body: Uint8Array | string): string {
     }
     return Buffer.from(body as string).toString("base64");
 }
+
+export interface StartOptions {
+    serviceTypeSearch: string | null;
+    serviceNameSelf: string | null;
+    serviceTypeSelf: string | null;
+}
+
+export interface StopOptions {
+    suspending: boolean;
+}

@@ -325,37 +325,32 @@ var Conservify = (function () {
     Conservify.prototype.removeTask = function (id) {
         delete this.active[id];
     };
-    Conservify.prototype.stop = function () {
+    Conservify.prototype.start = function (options) {
         var _this = this;
-        if (this.stopped) {
-            return Promise.resolve();
-        }
-        this.started = null;
-        return new Promise(function (resolve, reject) {
-            _this.stopped = {
-                resolve: resolve,
-                reject: reject,
-            };
-            _this.logger("stopping:");
-            _this.networking.serviceDiscovery.stop();
-        });
-    };
-    Conservify.prototype.start = function (serviceTypeSearch, serviceNameSelf, serviceTypeSelf) {
-        var _this = this;
-        if (serviceTypeSearch === void 0) { serviceTypeSearch = null; }
-        if (serviceNameSelf === void 0) { serviceNameSelf = null; }
-        if (serviceTypeSelf === void 0) { serviceTypeSelf = null; }
-        if (this.started) {
-            return Promise.resolve(true);
-        }
-        this.stopped = null;
         return new Promise(function (resolve, reject) {
             _this.started = {
                 resolve: resolve,
                 reject: reject,
             };
-            _this.logger("starting:", serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
-            _this.networking.serviceDiscovery.startWithServiceTypeSearchServiceNameSelfServiceTypeSelf(serviceTypeSearch, serviceNameSelf, serviceTypeSelf);
+            var iosOptions = DiscoveryStartOptions.alloc().init();
+            iosOptions.serviceTypeSearch = options.serviceTypeSearch;
+            iosOptions.serviceNameSelf = options.serviceNameSelf;
+            iosOptions.serviceTypeSelf = options.serviceTypeSelf;
+            _this.logger("starting:", JSON.stringify(iosOptions), JSON.stringify(options));
+            _this.networking.serviceDiscovery.startWithOptions(iosOptions);
+        });
+    };
+    Conservify.prototype.stop = function (options) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.stopped = {
+                resolve: resolve,
+                reject: reject,
+            };
+            var iosOptions = DiscoveryStopOptions.alloc().init();
+            iosOptions.suspending = options.suspending;
+            _this.logger("stopping:", JSON.stringify(iosOptions), JSON.stringify(options));
+            _this.networking.serviceDiscovery.stopWithOptions(iosOptions);
         });
     };
     Conservify.prototype.writeSampleData = function () {
