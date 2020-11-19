@@ -43,8 +43,11 @@ export interface StartOptions {
     serviceTypeSearch: string | null;
     serviceNameSelf: string | null;
     serviceTypeSelf: string | null;
+    dns?: boolean;
 }
 
 export interface StopOptions {
     suspending: boolean;
+    mdns?: boolean;
+    dns?: boolean;
 }

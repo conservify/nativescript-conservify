@@ -88,11 +88,17 @@ declare namespace org {
                 setServiceNameSelf(serviceNameSelf: string): void;
                 getServiceTypeSelf(): string;
                 setServiceTypeSelf(serviceTypeSelf: string): void;
+                setDns(value: boolean): void;
+                getDns(): boolean;
             }
 
             export class StopOptions {
                 isSuspending(): boolean;
                 setSuspending(suspending: boolean): void;
+                setDns(value: boolean): void;
+                getDns(): boolean;
+                setMdns(value: boolean): void;
+                getMdns(): boolean;
             }
 
             export class Web {

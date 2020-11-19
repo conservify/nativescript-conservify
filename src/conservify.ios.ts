@@ -126,6 +126,7 @@ declare class DiscoveryStartOptions extends NSObject {
     public serviceTypeSearch: string | null;
     public serviceNameSelf: string | null;
     public serviceTypeSelf: string | null;
+    public dns: boolean;
 }
 
 declare class DiscoveryStopOptions extends NSObject {
@@ -134,6 +135,8 @@ declare class DiscoveryStopOptions extends NSObject {
     static new(): DiscoveryStopOptions; // inherited from NSObject
 
     public suspending: boolean;
+    public mdns: boolean;
+    public dns: boolean;
 }
 
 declare class ServiceDiscovery extends NSObject {
@@ -623,7 +626,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
 
     public async writeSampleData(): Promise<void> {
         const sampleData: SampleData = SampleData.alloc().init();
-        await sampleData.write();
+        sampleData.write();
         return Promise.resolve();
     }
 

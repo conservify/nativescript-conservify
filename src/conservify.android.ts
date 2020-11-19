@@ -406,6 +406,7 @@ export class Conservify {
             javaOptions.setServiceTypeSearch(options.serviceTypeSearch);
             javaOptions.setServiceNameSelf(options.serviceNameSelf);
             javaOptions.setServiceTypeSelf(options.serviceTypeSelf);
+            javaOptions.setDns(options.dns);
 
             this.logger("starting:", JSON.stringify(javaOptions), JSON.stringify(options));
 
@@ -422,6 +423,8 @@ export class Conservify {
 
             const javaOptions = new org.conservify.networking.StopOptions();
             javaOptions.setSuspending(options.suspending);
+            javaOptions.setDns(options.dns);
+            javaOptions.setMdns(options.mdns);
 
             this.logger("stopping:", JSON.stringify(javaOptions), JSON.stringify(options));
 
