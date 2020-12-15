@@ -72,6 +72,9 @@ declare namespace org {
                 setBase64DecodeRequestBody(value: boolean);
                 setBase64EncodeResponseBody(value: boolean);
 
+                setFavorLocal(favorLocal: boolean);
+                isFavorLocal(): boolean;
+
                 setConnectionTimeout(timeout: number);
                 getConnectionTimeout(): number;
 

@@ -58,6 +58,7 @@ declare class WebTransfer extends NSObject {
     public uploadCopy: boolean;
     public base64EncodeResponseBody: boolean;
     public base64DecodeRequestBody: boolean;
+    public favorLocal: boolean;
 
     public headerWithKeyValue(key: string, value: string): WebTransfer;
 }
@@ -649,6 +650,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.body = info.body;
+        transfer.favorLocal = info.favorLocal;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);
@@ -673,6 +675,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.body = info.body;
+        transfer.favorLocal = info.favorLocal;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);
@@ -697,6 +700,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.base64EncodeResponseBody = true;
+        transfer.favorLocal = info.favorLocal;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);
@@ -726,6 +730,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.method = info.method;
         transfer.url = info.url;
         transfer.path = info.path;
+        transfer.favorLocal = info.favorLocal;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);
@@ -751,6 +756,7 @@ export class Conservify implements ActiveTasks, OtherPromises {
         transfer.url = info.url;
         transfer.path = info.path;
         transfer.uploadCopy = info.uploadCopy;
+        transfer.favorLocal = info.favorLocal;
 
         for (let [key, value] of Object.entries(info.headers || {})) {
             transfer.headerWithKeyValue(key, value as string);

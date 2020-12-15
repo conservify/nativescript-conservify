@@ -455,6 +455,7 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
+        transfer.setFavorLocal(info.favorLocal);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -491,6 +492,7 @@ export class Conservify {
         const transfer = new org.conservify.networking.WebTransfer();
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
+        transfer.setFavorLocal(info.favorLocal);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -529,6 +531,7 @@ export class Conservify {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setBase64EncodeResponseBody(true);
+        transfer.setFavorLocal(info.favorLocal);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -565,6 +568,7 @@ export class Conservify {
         transfer.setMethod(info.method);
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
+        transfer.setFavorLocal(info.favorLocal);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
@@ -597,6 +601,7 @@ export class Conservify {
         transfer.setUrl(info.url);
         transfer.setPath(info.path);
         transfer.setUploadCopy(info.uploadCopy);
+        transfer.setFavorLocal(info.favorLocal);
 
         if (info.connectionTimeout) {
             transfer.setConnectionTimeout(info.connectionTimeout);
