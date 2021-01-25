@@ -160,7 +160,7 @@ var Conservify = (function () {
             },
             onComplete: function (taskId, headers, contentType, body, statusCode) {
                 var jsHeaders = toJsHeaders(headers);
-                owner.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger("upload:onComplete " + JSON.stringify({ taskId: taskId, jsHeaders: jsHeaders, contentType: contentType, statusCode: statusCode }));
                 var task = active[taskId];
                 if (task) {
                     var info = task.info, transfer_1 = task.transfer;
@@ -219,7 +219,7 @@ var Conservify = (function () {
             },
             onComplete: function (taskId, headers, contentType, body, statusCode) {
                 var jsHeaders = toJsHeaders(headers);
-                owner.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger("download:onComplete " + JSON.stringify({ taskId: taskId, jsHeaders: jsHeaders, contentType: contentType, statusCode: statusCode }));
                 var task = active[taskId];
                 if (task) {
                     var info = task.info, transfer_2 = task.transfer;

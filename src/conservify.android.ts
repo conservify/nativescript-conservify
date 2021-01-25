@@ -231,7 +231,7 @@ export class Conservify {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
                 const jsHeaders = toJsHeaders(headers);
 
-                owner.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger(`upload:onComplete ${JSON.stringify({ taskId, jsHeaders, contentType, statusCode })}`);
 
                 const task = active[taskId];
                 if (task) {
@@ -299,7 +299,7 @@ export class Conservify {
             onComplete(taskId: string, headers: any, contentType: string, body: any, statusCode: number) {
                 const jsHeaders = toJsHeaders(headers);
 
-                owner.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+                owner.logger(`download:onComplete ${JSON.stringify({ taskId, jsHeaders, contentType, statusCode })}`);
 
                 const task = active[taskId];
                 if (task) {

@@ -302,7 +302,7 @@ class UploadListener extends NSObject implements WebTransferListener {
     ) {
         const jsHeaders = toJsHeaders(headers);
 
-        this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger(`upload:onComplete ${JSON.stringify({ taskId, jsHeaders, contentType, statusCode })}`);
 
         const task = this.tasks.getTask(taskId);
         if (task) {
@@ -392,7 +392,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
     ) {
         const jsHeaders = toJsHeaders(headers);
 
-        this.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger(`download:onComplete ${JSON.stringify({ taskId, jsHeaders, contentType, statusCode })}`);
 
         const task = this.tasks.getTask(taskId);
         if (task) {

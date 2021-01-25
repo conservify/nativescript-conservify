@@ -93,7 +93,7 @@ var UploadListener = (function (_super) {
     };
     UploadListener.prototype.onCompleteWithTaskIdHeadersContentTypeBodyStatusCode = function (taskId, headers, contentType, body, statusCode) {
         var jsHeaders = toJsHeaders(headers);
-        this.logger("upload:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger("upload:onComplete " + JSON.stringify({ taskId: taskId, jsHeaders: jsHeaders, contentType: contentType, statusCode: statusCode }));
         var task = this.tasks.getTask(taskId);
         if (task) {
             var info = task.info, transfer_1 = task.transfer;
@@ -167,7 +167,7 @@ var DownloadListener = (function (_super) {
     };
     DownloadListener.prototype.onCompleteWithTaskIdHeadersContentTypeBodyStatusCode = function (taskId, headers, contentType, body, statusCode) {
         var jsHeaders = toJsHeaders(headers);
-        this.logger("download:onComplete", taskId, jsHeaders, contentType, statusCode);
+        this.logger("download:onComplete " + JSON.stringify({ taskId: taskId, jsHeaders: jsHeaders, contentType: contentType, statusCode: statusCode }));
         var task = this.tasks.getTask(taskId);
         if (task) {
             var info = task.info, transfer_2 = task.transfer;
