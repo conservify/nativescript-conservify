@@ -1,5 +1,7 @@
 import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
 
+export * from "./conservify.common";
+
 interface NetworkingListener {
     onStarted(): void;
     onStopped(): void;
@@ -344,7 +346,7 @@ class UploadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId);
 
-            task.reject(new ConnectionError(message, info));
+            task.reject(new ConnectionError(message || "unknown error", info));
         } else {
             this.logger("upload:onError (orphaned)", taskId);
         }
@@ -434,7 +436,7 @@ class DownloadListener extends NSObject implements WebTransferListener {
 
             this.tasks.removeTask(taskId);
 
-            task.reject(new ConnectionError(message, info));
+            task.reject(new ConnectionError(message || "unknown error", info));
         } else {
             this.logger("download:onError (orphaned)", taskId, message);
         }

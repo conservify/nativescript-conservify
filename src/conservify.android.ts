@@ -1,6 +1,8 @@
 import { ConnectionError, FileSystemError, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
 import { android as androidApp } from "tns-core-modules/application";
 
+export * from "./conservify.common";
+
 function toJsHeaders(headers) {
     const jsHeaders = {};
     const iter = headers.entrySet().iterator();
@@ -273,7 +275,7 @@ export class Conservify {
 
                     delete active[taskId];
 
-                    task.reject(new ConnectionError(message, info));
+                    task.reject(new ConnectionError(message || "unknown error", info));
                 } else {
                     owner.logger("upload:onError (orphaned)", taskId, message);
                 }
@@ -341,7 +343,7 @@ export class Conservify {
 
                     delete active[taskId];
 
-                    task.reject(new ConnectionError(message, info));
+                    task.reject(new ConnectionError(message || "unknown error", info));
                 } else {
                     owner.logger("download:onError (orphaned)", taskId, message);
                 }
