@@ -1,11 +1,10 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Conservify = void 0;
+var buffer_1 = require("buffer");
+var core_1 = require("@nativescript/core");
 var conservify_common_1 = require("./conservify.common");
-var application_1 = require("tns-core-modules/application");
-__export(require("./conservify.common"));
+__exportStar(require("./conservify.common"), exports);
 function toJsHeaders(headers) {
     var jsHeaders = {};
     var iter = headers.entrySet().iterator();
@@ -60,7 +59,7 @@ var Conservify = (function () {
         var owner = this;
         var active = this.active;
         var getAndroidContext = function () {
-            if (!application_1.android.context) {
+            if (!core_1.Application.android.context) {
                 var cc = new org.conservify.ContextContainer(null);
                 if (!cc.getContext()) {
                     throw new Error("No androidApp.context? Are we being called before application.start?");
@@ -68,7 +67,7 @@ var Conservify = (function () {
                 return cc.getContext();
             }
             else {
-                var cc = new org.conservify.ContextContainer(application_1.android.context);
+                var cc = new org.conservify.ContextContainer(core_1.Application.android.context);
                 return cc.getContext();
             }
         };
@@ -175,7 +174,7 @@ var Conservify = (function () {
                             }
                             else {
                                 if (transfer_1.isBase64EncodeResponseBody()) {
-                                    return Buffer.from(body, "base64");
+                                    return buffer_1.Buffer.from(body, "base64");
                                 }
                                 return body;
                             }
@@ -234,7 +233,7 @@ var Conservify = (function () {
                             }
                             else {
                                 if (transfer_2.isBase64EncodeResponseBody()) {
-                                    return Buffer.from(body, "base64");
+                                    return buffer_1.Buffer.from(body, "base64");
                                 }
                                 return body;
                             }

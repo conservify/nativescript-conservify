@@ -1,5 +1,8 @@
+import { Buffer } from "buffer";
+
+import { Application } from "@nativescript/core";
+
 import { ConnectionError, FileSystemError, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
-import { android as androidApp } from "tns-core-modules/application";
 
 export * from "./conservify.common";
 
@@ -111,14 +114,14 @@ export class Conservify {
         const active = this.active;
 
         const getAndroidContext = () => {
-            if (!androidApp.context) {
+            if (!Application.android.context) {
                 const cc = new org.conservify.ContextContainer(null);
                 if (!cc.getContext()) {
                     throw new Error("No androidApp.context? Are we being called before application.start?");
                 }
                 return cc.getContext();
             } else {
-                const cc = new org.conservify.ContextContainer(androidApp.context);
+                const cc = new org.conservify.ContextContainer(Application.android.context);
                 return cc.getContext();
             }
         };

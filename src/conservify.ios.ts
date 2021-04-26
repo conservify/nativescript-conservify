@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 import { ConnectionError, PromiseCallbacks, TransferInfo, HttpResponse, encodeBody, StartOptions, StopOptions } from "./conservify.common";
 
 export * from "./conservify.common";

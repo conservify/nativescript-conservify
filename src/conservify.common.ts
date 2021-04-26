@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 export class FileSystemError extends Error {
     constructor(message: string, public readonly path: string) {
         super(message);
